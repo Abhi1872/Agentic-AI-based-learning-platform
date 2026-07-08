@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} - NeuroAid Learning{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ lesson.title }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                        <div>
+                            <span class="badge bg-{{ get_difficulty_color(difficulty) }} mb-2">
+                                {{ get_difficulty_label(difficulty) }}
+                            </span>
+                            <h1 class="h3 mb-2">{{ lesson.title }}</h1>
+                            <p class="text-muted mb-0">
+                                <i data-feather="clock" aria-hidden="true" style="width: 16px; height: 16px;"></i>
+                                Estimated time: {{ lesson.estimated_time }} minutes
+                                <span class="mx-2">|</span>
+                                <i data-feather="folder" aria-hidden="true" style="width: 16px; height: 16px;"></i>
+                                {{ lesson.subject }}
+                            </p>
+                        </div>
+                        
+                        <div class="audio-controls">
+                            <button class="btn btn-outline-primary btn-lg" id="playAudioBtn" 
+                                    aria-label="Play lesson audio" title="Play Audio">
+                                <i data-feather="volume-2" aria-hidden="true"></i>
+                                <span class="d-none d-sm-inline">Listen</span>
+                            </button>
+                            <audio id="lessonAudio" {% if audio_url %}src="{{ audio_url }}"{% endif %} preload="auto"></audio>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="lesson-content" id="lessonContent">
+                        <div class="content-text" style="font-size: {{ current_user.font_size or 18 }}px; line-height: 1.8;">
+                            {{ content | safe if '<' in content else content | replace('\n\n', '</p><p class="mb-4">') | replace('\n', '<br>') | safe }}
+                        </div>
+                        
+                        {% if content_formats.key_points %}
+                        <div class="key-points-section mt-5 p-4 bg-light rounded-3">
+                            <h3 class="h5 mb-3">
+                                <i data-feather="key" aria-hidden="true"></i>
+                                Key Points
+                            </h3>
+                            <ul class="key-points-list mb-0">
+                                {% for point in content_formats.key_points[:5] %}
+                                <li class="mb-2">{{ point }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent border-0 p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="nav-buttons">
+                            {% if prev_lesson %}
+                            <a href="{{ url_for('lesson', lesson_id=prev_lesson.id) }}" 
+                               class="btn btn-outline-secondary btn-lg">
+                                <i data-feather="arrow-left" aria-hidden="true"></i>
+                                Previous
+                            </a>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="action-buttons d-flex gap-2 flex-wrap">
+                            <form action="{{ url_for('complete_lesson', lesson_id=lesson.id) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i data-feather="check-circle" aria-hidden="true"></i>
+                                    Mark Complete
+                                </button>
+                            </form>
+                            
+                            {% if quiz %}
+                            <a href="{{ url_for('take_quiz', quiz_id=quiz.id) }}" class="btn btn-primary btn-lg">
+                                <i data-feather="edit-3" aria-hidden="true"></i>
+                                Take Quiz
+                            </a>
+                            {% endif %}
+                            
+                            {% if next_lesson %}
+                            <a href="{{ url_for('lesson', lesson_id=next_lesson.id) }}" 
+                               class="btn btn-outline-primary btn-lg">
+                                Next
+                                <i data-feather="arrow-right" aria-hidden="true"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h3 class="h5 mb-0">
+                        <i data-feather="sliders" aria-hidden="true"></i>
+                        Reading Options
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Font Size</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="btn btn-outline-secondary" id="decreaseFont" aria-label="Decrease font size">
+                                <i data-feather="minus" aria-hidden="true"></i>
+                            </button>
+                            <span id="currentFontSize" class="fs-5 fw-bold">{{ current_user.font_size or 18 }}px</span>
+                            <button class="btn btn-outline-secondary" id="increaseFont" aria-label="Increase font size">
+                                <i data-feather="plus" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <!-- Sign Language Video -->
+                        {% if lesson.id <= 4 %}
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Sign Language Support</label>
+                            <video width="100%" style="max-height: 200px; border-radius: 10px;" controls>
+                                <source src="{{ url_for('static', filename='video/lesson' ~ lesson.id ~ '.mp4') }}" type="video/mp4">
+                            </video>
+                        </div>
+                        {% endif %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Audio Controls</label>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" id="readAloudBtn">
+                                <i data-feather="volume-2" aria-hidden="true"></i>
+                                Read Aloud
+                            </button>
+                            <button class="btn btn-outline-secondary" id="pauseAudioBtn" disabled>
+                                <i data-feather="pause" aria-hidden="true"></i>
+                                Pause
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h3 class="h5 mb-0">
+                        <i data-feather="info" aria-hidden="true"></i>
+                        Your Progress
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="progress mb-3" style="height: 12px;" role="progressbar"
+                         aria-valuenow="{{ lesson_progress.progress_percent if lesson_progress else 0 }}" 
+                         aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-success" 
+                             style="width: {{ lesson_progress.progress_percent if lesson_progress else 0 }}%"></div>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        {{ lesson_progress.progress_percent|round|int if lesson_progress else 0 }}% complete
+                    </p>
+                    
+                    {% if lesson_progress and lesson_progress.time_spent %}
+                    <p class="text-muted small mb-0 mt-2">
+                        Time spent: {{ format_time_spent(lesson_progress.time_spent) }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if voice_commands %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h3 class="h5 mb-0">
+                        <i data-feather="mic" aria-hidden="true"></i>
+                        Voice Commands
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="list-unstyled small mb-0">
+                        {% for cmd in voice_commands[:6] %}
+                        <li class="mb-2">
+                            <strong>"{{ cmd.command }}"</strong> - {{ cmd.description }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{{ url_for('help_page') }}" class="small">See all commands</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const lessonContent = document.getElementById('lessonContent');
+    const contentText = lessonContent.querySelector('.content-text');
+    let currentFontSize = {{ current_user.font_size or 18 }};
+    
+    document.getElementById('increaseFont')?.addEventListener('click', function() {
+        if (currentFontSize < 32) {
+            currentFontSize += 2;
+            contentText.style.fontSize = currentFontSize + 'px';
+            document.getElementById('currentFontSize').textContent = currentFontSize + 'px';
+        }
+    });
+    
+    document.getElementById('decreaseFont')?.addEventListener('click', function() {
+        if (currentFontSize > 14) {
+            currentFontSize -= 2;
+            contentText.style.fontSize = currentFontSize + 'px';
+            document.getElementById('currentFontSize').textContent = currentFontSize + 'px';
+        }
+    });
+    
+    const audio = document.getElementById('lessonAudio');
+    const playBtn = document.getElementById('playAudioBtn');
+    const readAloudBtn = document.getElementById('readAloudBtn');
+    const pauseAudioBtn = document.getElementById('pauseAudioBtn');
+    
+    async function generateAndPlayAudio() {
+        if (!audio.src || audio.src === window.location.href) {
+            playBtn.disabled = true;
+            playBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Loading...';
+            
+            try {
+                const lessonTextElement = document.querySelector('.content-text') || document.getElementById('lessonContent');
+                let text = '';
+                if (lessonTextElement && lessonTextElement.innerText) {
+                    text = lessonTextElement.innerText.substring(0, 2000);
+                    text = text.replace(/\s+/g, ' ').trim();
+                }
+                
+                if (!text || text.length < 10) {
+                    playBtn.disabled = false;
+                    playBtn.innerHTML = '<i data-feather="volume-2" aria-hidden="true"></i><span class="d-none d-sm-inline">Listen</span>';
+                    feather.replace();
+                    alert('Unable to generate audio: No lesson content found');
+                    return;
+                }
+                
+                const response = await fetch(`/api/tts?text=${encodeURIComponent(text)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.audio_url) {
+                        audio.src = data.audio_url;
+                        audio.play();
+                        playBtn.innerHTML = '<i data-feather="pause" aria-hidden="true"></i><span class="d-none d-sm-inline">Pause</span>';
+                    }
+                }
+            } catch (error) {
+                console.error('TTS error:', error);
+                playBtn.innerHTML = '<i data-feather="volume-2" aria-hidden="true"></i><span class="d-none d-sm-inline">Listen</span>';
+                playBtn.disabled = false;
+                feather.replace();
+                return;
+            }
+            playBtn.disabled = false;
+            feather.replace();
+        } else {
+            if (audio.paused) {
+                audio.play();
+                playBtn.innerHTML = '<i data-feather="pause" aria-hidden="true"></i><span class="d-none d-sm-inline">Pause</span>';
+            } else {
+                audio.pause();
+                playBtn.innerHTML = '<i data-feather="volume-2" aria-hidden="true"></i><span class="d-none d-sm-inline">Listen</span>';
+            }
+            feather.replace();
+        }
+    }
+    
+    if (playBtn) {
+        playBtn.addEventListener('click', generateAndPlayAudio);
+    }
+    
+    if (readAloudBtn) {
+        readAloudBtn.addEventListener('click', generateAndPlayAudio);
+    }
+    
+    if (pauseAudioBtn) {
+        pauseAudioBtn.addEventListener('click', function() {
+            audio.pause();
+            playBtn.innerHTML = '<i data-feather="volume-2" aria-hidden="true"></i><span class="d-none d-sm-inline">Listen</span>';
+            feather.replace();
+        });
+    }
+    
+    if (audio) {
+        audio.addEventListener('play', function() {
+            if (pauseAudioBtn) pauseAudioBtn.disabled = false;
+        });
+        
+        audio.addEventListener('pause', function() {
+            if (pauseAudioBtn) pauseAudioBtn.disabled = true;
+        });
+        
+        audio.addEventListener('ended', function() {
+            playBtn.innerHTML = '<i data-feather="volume-2" aria-hidden="true"></i><span class="d-none d-sm-inline">Listen</span>';
+            if (pauseAudioBtn) pauseAudioBtn.disabled = true;
+            feather.replace();
+        });
+    }
+});
+</script>
+{% endblock %}

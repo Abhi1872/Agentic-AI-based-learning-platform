@@ -1,0 +1,158 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Machine Learning{% endblock %}
+{% block lesson_heading %}Machine Learning{% endblock %}
+{% block lesson_description %}Learn how computers can learn from data to make predictions and decisions{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section" id="lesson-audio-content">
+    {% if difficulty == 'beginner' %}
+    <h2>What is Machine Learning?</h2>
+    <p class="lead">Machine Learning is a way for computers to learn from examples instead of being explicitly programmed. The computer finds patterns in data and uses them to make predictions.</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Just like you learn to recognize cats by seeing many cat pictures, computers can learn from data to recognize patterns.
+    </div>
+
+    <h3>Types of Machine Learning</h3>
+    <ul>
+        <li><strong>Supervised Learning:</strong> Learning from labeled examples (like flashcards)</li>
+        <li><strong>Unsupervised Learning:</strong> Finding patterns without labels</li>
+        <li><strong>Reinforcement Learning:</strong> Learning by trial and error with rewards</li>
+    </ul>
+
+    <h3>Real-World Examples</h3>
+    <ul>
+        <li>Email spam filters</li>
+        <li>Movie recommendations</li>
+        <li>Voice assistants</li>
+        <li>Self-driving cars</li>
+    </ul>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Core ML Algorithms</h2>
+    <p class="lead">Understanding fundamental machine learning algorithms and when to use them.</p>
+    
+    <h3>Linear Regression</h3>
+    <div class="code-example">
+        <pre>import numpy as np
+from sklearn.linear_model import LinearRegression
+
+# Predict house prices based on size
+X = np.array([[1000], [1500], [2000], [2500]])  # sq ft
+y = np.array([200000, 275000, 350000, 425000])   # price
+
+model = LinearRegression()
+model.fit(X, y)
+
+predicted = model.predict([[1800]])
+print(f"Predicted price: ${predicted[0]:,.0f}")</pre>
+    </div>
+
+    <h3>Classification with Decision Trees</h3>
+    <div class="code-example">
+        <pre>from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train model
+clf = DecisionTreeClassifier(max_depth=3)
+clf.fit(X_train, y_train)
+
+# Evaluate
+accuracy = clf.score(X_test, y_test)
+print(f"Accuracy: {accuracy:.2%}")</pre>
+    </div>
+
+    <h3>Key Concepts</h3>
+    <ul>
+        <li><strong>Overfitting:</strong> Model memorizes training data, fails on new data</li>
+        <li><strong>Underfitting:</strong> Model is too simple to capture patterns</li>
+        <li><strong>Cross-Validation:</strong> Test model on multiple data splits</li>
+        <li><strong>Feature Engineering:</strong> Creating useful input features</li>
+    </ul>
+
+    {% else %}
+    <h2>Advanced Machine Learning</h2>
+    <p class="lead">Deep learning, neural networks, and advanced optimization techniques.</p>
+    
+    <h3>Neural Networks</h3>
+    <div class="code-example">
+        <pre>import torch
+import torch.nn as nn
+
+class NeuralNetwork(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super().__init__()
+        self.layer1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.layer2 = nn.Linear(hidden_size, output_size)
+    
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.relu(x)
+        x = self.layer2(x)
+        return x
+
+# Training loop
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+criterion = nn.CrossEntropyLoss()
+
+for epoch in range(epochs):
+    optimizer.zero_grad()
+    outputs = model(inputs)
+    loss = criterion(outputs, labels)
+    loss.backward()
+    optimizer.step()</pre>
+    </div>
+
+    <h3>Gradient Descent Optimization</h3>
+    <div class="code-example">
+        <pre>Optimization Algorithms:
+├── SGD (Stochastic Gradient Descent)
+│   θ = θ - η∇L(θ)
+├── Momentum
+│   v = βv + η∇L(θ)
+│   θ = θ - v
+├── Adam (Adaptive Moment Estimation)
+│   m = β₁m + (1-β₁)∇L
+│   v = β₂v + (1-β₂)(∇L)²
+│   θ = θ - η·m/(√v + ε)
+└── Learning Rate Scheduling
+    - Step decay, cosine annealing</pre>
+    </div>
+
+    <h3>Deep Learning Architectures</h3>
+    <ul>
+        <li><strong>CNN:</strong> Convolutional networks for images</li>
+        <li><strong>RNN/LSTM:</strong> Sequential data, time series</li>
+        <li><strong>Transformer:</strong> Attention mechanism, NLP</li>
+        <li><strong>GAN:</strong> Generative adversarial networks</li>
+    </ul>
+
+    <h3>Regularization Techniques</h3>
+    <ul>
+        <li><strong>L1/L2 Regularization:</strong> Weight penalties</li>
+        <li><strong>Dropout:</strong> Randomly disable neurons</li>
+        <li><strong>Batch Normalization:</strong> Normalize layer inputs</li>
+        <li><strong>Early Stopping:</strong> Stop when validation loss increases</li>
+    </ul>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Key Takeaways</h3>
+    <div class="alert alert-success">
+        <ul class="mb-0">
+            <li>Machine learning enables computers to learn patterns from data</li>
+            <li>Choosing the right algorithm depends on your problem and data</li>
+            <li>Deep learning excels at complex tasks like image and language processing</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

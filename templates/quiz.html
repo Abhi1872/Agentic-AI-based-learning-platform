@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz: {{ lesson.title }} - NeuroAid Learning{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('lesson', lesson_id=lesson.id) }}">{{ lesson.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Quiz</li>
+        </ol>
+    </nav>
+    
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9 col-xl-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h4 mb-1">{{ lesson.title }} Quiz</h1>
+                            <p class="mb-0 opacity-75">
+                                <span class="badge bg-light text-primary">{{ quiz.difficulty | capitalize }}</span>
+                                <span class="ms-2">{{ total_questions }} Questions</span>
+                            </p>
+                        </div>
+                        <div class="text-end d-flex align-items-center gap-3">
+                            <button type="button" class="btn btn-light btn-sm" onclick="readQuizAloud()" title="Read quiz aloud">
+                                <i data-feather="volume-2" aria-hidden="true" style="width: 16px; height: 16px;"></i>
+                                Read Aloud
+                            </button>
+                            <div class="quiz-timer" id="quizTimer">
+                                <i data-feather="clock" aria-hidden="true" style="width: 20px; height: 20px;"></i>
+                                <span id="timerDisplay">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form action="{{ url_for('submit_quiz', quiz_id=quiz.id) }}" method="POST" id="quizForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="card-body p-0">
+                        {% for question in questions %}
+                        <div class="quiz-question p-4 {% if not loop.first %}border-top{% endif %}" 
+                             id="question{{ loop.index }}"
+                             data-question="{{ loop.index }}">
+                            
+                            <div class="question-header mb-4">
+                                <span class="badge bg-secondary fs-6 mb-2">
+                                    Question {{ loop.index }} of {{ total_questions }}
+                                </span>
+                                <h2 class="h5 mb-0">{{ question.question_text }}</h2>
+                            </div>
+                            
+                            <div class="options-list" role="radiogroup" 
+                                 aria-label="Options for question {{ loop.index }}">
+                                
+                                <div class="option-item mb-3">
+                                    <input type="radio" class="btn-check" 
+                                           name="question_{{ question.id }}" 
+                                           id="q{{ question.id }}_a" 
+                                           value="A" 
+                                           autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-lg w-100 text-start p-3" 
+                                           for="q{{ question.id }}_a">
+                                        <span class="option-letter me-3">A</span>
+                                        <span class="option-text">{{ question.option_a }}</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="option-item mb-3">
+                                    <input type="radio" class="btn-check" 
+                                           name="question_{{ question.id }}" 
+                                           id="q{{ question.id }}_b" 
+                                           value="B" 
+                                           autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-lg w-100 text-start p-3" 
+                                           for="q{{ question.id }}_b">
+                                        <span class="option-letter me-3">B</span>
+                                        <span class="option-text">{{ question.option_b }}</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="option-item mb-3">
+                                    <input type="radio" class="btn-check" 
+                                           name="question_{{ question.id }}" 
+                                           id="q{{ question.id }}_c" 
+                                           value="C" 
+                                           autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-lg w-100 text-start p-3" 
+                                           for="q{{ question.id }}_c">
+                                        <span class="option-letter me-3">C</span>
+                                        <span class="option-text">{{ question.option_c }}</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="option-item">
+                                    <input type="radio" class="btn-check" 
+                                           name="question_{{ question.id }}" 
+                                           id="q{{ question.id }}_d" 
+                                           value="D" 
+                                           autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-lg w-100 text-start p-3" 
+                                           for="q{{ question.id }}_d">
+                                        <span class="option-letter me-3">D</span>
+                                        <span class="option-text">{{ question.option_d }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="card-footer bg-transparent p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div class="progress-indicator">
+                                <span class="text-muted" id="progressText">0 of {{ total_questions }} answered</span>
+                            </div>
+                            
+                            <div class="action-buttons d-flex gap-2">
+                                <a href="{{ url_for('lesson', lesson_id=lesson.id) }}" 
+                                   class="btn btn-outline-secondary btn-lg">
+                                    <i data-feather="arrow-left" aria-hidden="true"></i>
+                                    Back to Lesson
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitQuizBtn">
+                                    <i data-feather="check" aria-hidden="true"></i>
+                                    Submit Quiz
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let startTime = Date.now();
+    const timerDisplay = document.getElementById('timerDisplay');
+    
+    function updateTimer() {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const seconds = (elapsed % 60).toString().padStart(2, '0');
+        timerDisplay.textContent = `${minutes}:${seconds}`;
+    }
+    
+    setInterval(updateTimer, 1000);
+    
+    const form = document.getElementById('quizForm');
+    const progressText = document.getElementById('progressText');
+    const totalQuestions = {{ total_questions }};
+    
+    function updateProgress() {
+        const answered = form.querySelectorAll('input[type="radio"]:checked').length;
+        progressText.textContent = `${answered} of ${totalQuestions} answered`;
+    }
+    
+    form.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener('change', updateProgress);
+    });
+    
+    form.addEventListener('submit', function(e) {
+        const answered = form.querySelectorAll('input[type="radio"]:checked').length;
+        if (answered < totalQuestions) {
+            if (!confirm(`You have only answered ${answered} of ${totalQuestions} questions. Are you sure you want to submit?`)) {
+                e.preventDefault();
+            }
+        }
+    });
+    
+    window.readQuizAloud = function() {
+        if (!window.speechSynthesis) return;
+        
+        const questions = document.querySelectorAll('.quiz-question');
+        let fullText = 'Quiz started. ';
+        
+        questions.forEach((q, i) => {
+            const questionText = q.querySelector('h2')?.textContent || '';
+            const options = q.querySelectorAll('.option-item label');
+            
+            fullText += `Question ${i + 1}: ${questionText}. `;
+            
+            options.forEach((opt, j) => {
+                const letter = ['A', 'B', 'C', 'D'][j];
+                const optText = opt.querySelector('.option-text')?.textContent || opt.textContent;
+                fullText += `Option ${letter}: ${optText}. `;
+            });
+        });
+        
+        fullText += 'Say option A, B, C, or D to select your answer. Say submit when done.';
+        
+        const utterance = new SpeechSynthesisUtterance(fullText);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    };
+    
+    window.readCurrentQuestion = function(index) {
+        if (!window.speechSynthesis) return;
+        
+        const question = document.querySelector(`.quiz-question[data-question="${index}"]`) || 
+                        document.querySelectorAll('.quiz-question')[index - 1];
+        if (!question) return;
+        
+        const questionText = question.querySelector('h2')?.textContent || '';
+        const options = question.querySelectorAll('.option-item label');
+        
+        let text = `Question ${index}: ${questionText}. `;
+        options.forEach((opt, j) => {
+            const letter = ['A', 'B', 'C', 'D'][j];
+            const optText = opt.querySelector('.option-text')?.textContent || opt.textContent;
+            text += `Option ${letter}: ${optText}. `;
+        });
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    };
+    
+    if (window.voiceCommandManager) {
+        window.voiceCommandManager.quizMode = true;
+    }
+});
+</script>
+{% endblock %}

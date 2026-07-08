@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - NeuroAid Learning{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100 py-5">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="text-center mb-5">
+                    <div class="brand-logo mb-4">
+                        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="40" cy="40" r="36" stroke="#4F46E5" stroke-width="4"/>
+                            <path d="M24 40L34 50L56 28" stroke="#4F46E5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h1 class="display-4 fw-bold text-primary">NeuroAid</h1>
+                    <p class="lead text-muted">Agentic AI Based Learning Platform</p>
+                    <p class="text-secondary">Personalized learning for every ability</p>
+                </div>
+                
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <h2 class="h4 text-center mb-4">Welcome Back</h2>
+                        
+                        {% if students %}
+                        <form action="{{ url_for('login') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-4">
+                                <label for="student_id" class="form-label fw-semibold">Select Your Profile</label>
+                                <select class="form-select form-select-lg" id="student_id" name="student_id" required 
+                                        aria-describedby="studentHelp">
+                                    <option value="">Choose your name...</option>
+                                    {% for student in students %}
+                                    <option value="{{ student.student_id }}" 
+                                            data-has-password="{{ 'true' if student.password_hash else 'false' }}">
+                                        {{ student.name }} ({{ student.student_id }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div id="studentHelp" class="form-text">Select your profile to continue learning</div>
+                            </div>
+                            
+                            <div class="mb-4" id="passwordField" style="display: none;">
+                                <label for="password" class="form-label fw-semibold">Password</label>
+                                <input type="password" class="form-control form-control-lg" id="password" name="password" 
+                                       placeholder="Enter your password">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i data-feather="log-in" aria-hidden="true"></i>
+                                <span>Continue Learning</span>
+                            </button>
+                        </form>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i data-feather="users" class="text-muted mb-3" style="width: 48px; height: 48px;" aria-hidden="true"></i>
+                            <p class="text-muted mb-0">No student profiles yet.</p>
+                            <p class="text-muted">Create your profile to get started!</p>
+                        </div>
+                        {% endif %}
+                        
+                        <hr class="my-4">
+                        
+                        <div class="text-center">
+                            <p class="text-muted mb-3">New to Agentic?</p>
+                            <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg w-100">
+                                <i data-feather="user-plus" aria-hidden="true"></i>
+                                <span>Create New Profile</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary mb-3">
+                        <i data-feather="arrow-left" aria-hidden="true"></i>
+                        <span>Back to Role Selection</span>
+                    </a>
+                    <br>
+                    <a href="{{ url_for('help_page') }}" class="text-muted text-decoration-none">
+                        <i data-feather="help-circle" aria-hidden="true"></i>
+                        <span>Need help? View accessibility options</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const studentSelect = document.getElementById('student_id');
+    const passwordField = document.getElementById('passwordField');
+    
+    if (studentSelect && passwordField) {
+        studentSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const hasPassword = selectedOption.getAttribute('data-has-password') === 'true';
+            passwordField.style.display = hasPassword ? 'block' : 'none';
+        });
+    }
+});
+</script>
+{% endblock %}

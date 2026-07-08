@@ -1,0 +1,156 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Software Engineering{% endblock %}
+{% block lesson_heading %}Software Engineering{% endblock %}
+{% block lesson_description %}Learn principles of building reliable, maintainable software systems{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section" id="lesson-audio-content">
+    {% if difficulty == 'beginner' %}
+    <h2>What is Software Engineering?</h2>
+    <p class="lead">Software engineering is the practice of building software in an organized, reliable way. It's about creating programs that work well and are easy to maintain.</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Just like architects plan buildings before construction, software engineers plan and design programs before coding.
+    </div>
+
+    <h3>The Software Development Life Cycle</h3>
+    <ol>
+        <li><strong>Planning:</strong> Decide what to build</li>
+        <li><strong>Analysis:</strong> Understand the requirements</li>
+        <li><strong>Design:</strong> Plan how to build it</li>
+        <li><strong>Implementation:</strong> Write the code</li>
+        <li><strong>Testing:</strong> Make sure it works</li>
+        <li><strong>Deployment:</strong> Release to users</li>
+        <li><strong>Maintenance:</strong> Fix bugs and add features</li>
+    </ol>
+
+    <h3>Good Coding Practices</h3>
+    <ul>
+        <li>Write clear, readable code</li>
+        <li>Use meaningful variable names</li>
+        <li>Add comments to explain complex logic</li>
+        <li>Test your code before sharing</li>
+    </ul>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Software Development Methodologies</h2>
+    <p class="lead">Understanding different approaches to organizing software development projects.</p>
+    
+    <h3>Agile Development</h3>
+    <p>Iterative approach with frequent delivery:</p>
+    <ul>
+        <li><strong>Sprints:</strong> Short development cycles (1-4 weeks)</li>
+        <li><strong>Daily Standups:</strong> Brief team sync meetings</li>
+        <li><strong>User Stories:</strong> Requirements from user perspective</li>
+        <li><strong>Continuous Integration:</strong> Frequent code merging</li>
+    </ul>
+
+    <h3>Design Patterns</h3>
+    <p>Reusable solutions to common problems:</p>
+    <div class="code-example">
+        <pre>class Singleton:
+    """Singleton Pattern - ensures only one instance exists"""
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+class Observer:
+    """Observer Pattern - notify multiple objects of changes"""
+    def __init__(self):
+        self._observers = []
+    
+    def attach(self, observer):
+        self._observers.append(observer)
+    
+    def notify(self, message):
+        for observer in self._observers:
+            observer.update(message)</pre>
+    </div>
+
+    <h3>Version Control</h3>
+    <div class="code-example">
+        <pre># Git workflow
+git clone repository_url       # Clone repository
+git checkout -b feature-branch # Create feature branch
+git add .                      # Stage changes
+git commit -m "Add feature"    # Commit changes
+git push origin feature-branch # Push to remote
+# Create pull request for review</pre>
+    </div>
+
+    {% else %}
+    <h2>Advanced Software Engineering</h2>
+    <p class="lead">Exploring software architecture, microservices, DevOps, and quality assurance practices.</p>
+    
+    <h3>Software Architecture Patterns</h3>
+    <ul>
+        <li><strong>Monolithic:</strong> Single deployable unit</li>
+        <li><strong>Microservices:</strong> Independent, loosely coupled services</li>
+        <li><strong>Event-Driven:</strong> Communication via events/messages</li>
+        <li><strong>Layered:</strong> Separation of concerns in layers</li>
+    </ul>
+
+    <h3>SOLID Principles</h3>
+    <div class="code-example">
+        <pre>S - Single Responsibility: One class, one purpose
+O - Open/Closed: Open for extension, closed for modification
+L - Liskov Substitution: Subtypes must be substitutable
+I - Interface Segregation: Many specific interfaces > one general
+D - Dependency Inversion: Depend on abstractions, not concretions
+
+# Example: Dependency Inversion
+from abc import ABC, abstractmethod
+
+class DatabaseInterface(ABC):
+    @abstractmethod
+    def save(self, data): pass
+
+class MySQLDatabase(DatabaseInterface):
+    def save(self, data):
+        # MySQL implementation
+        pass
+
+class UserService:
+    def __init__(self, database: DatabaseInterface):
+        self.db = database  # Depends on abstraction</pre>
+    </div>
+
+    <h3>CI/CD Pipeline</h3>
+    <div class="code-example">
+        <pre>Continuous Integration / Continuous Deployment:
+
+Code Commit → Build → Unit Tests → Integration Tests 
+           → Security Scan → Deploy to Staging 
+           → End-to-End Tests → Deploy to Production
+
+Key Tools:
+- Jenkins, GitHub Actions, GitLab CI
+- Docker, Kubernetes for containerization
+- Terraform, Ansible for infrastructure as code</pre>
+    </div>
+
+    <h3>Testing Pyramid</h3>
+    <ul>
+        <li><strong>Unit Tests (70%):</strong> Test individual functions/methods</li>
+        <li><strong>Integration Tests (20%):</strong> Test component interactions</li>
+        <li><strong>E2E Tests (10%):</strong> Test complete user workflows</li>
+    </ul>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Key Takeaways</h3>
+    <div class="alert alert-success">
+        <ul class="mb-0">
+            <li>Good software engineering practices reduce bugs and improve maintainability</li>
+            <li>Design patterns provide proven solutions to common problems</li>
+            <li>Automated testing and CI/CD improve software quality</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

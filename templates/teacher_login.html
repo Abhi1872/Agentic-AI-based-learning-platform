@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Login - Agentic{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100 py-5">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="text-center mb-5">
+                    <div class="brand-logo mb-4">
+                        <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i data-feather="clipboard" class="text-success" style="width: 40px; height: 40px;"></i>
+                        </div>
+                    </div>
+                    <h1 class="display-5 fw-bold text-success">Teacher Portal</h1>
+                    <p class="text-muted">Manage students and track progress</p>
+                </div>
+                
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <h2 class="h4 text-center mb-4">Teacher Login</h2>
+                        
+                        <form action="{{ url_for('teacher_login') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <div class="mb-4">
+                                <label for="teacher_id" class="form-label fw-semibold">Teacher ID</label>
+                                <input type="text" class="form-control form-control-lg" id="teacher_id" name="teacher_id" 
+                                       placeholder="e.g., TEACH001" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold">Password</label>
+                                <input type="password" class="form-control form-control-lg" id="password" name="password" 
+                                       placeholder="Enter your password">
+                                <small class="text-muted">Leave blank if no password set</small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                                <i data-feather="log-in" aria-hidden="true"></i>
+                                <span>Login</span>
+                            </button>
+                        </form>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                                <i data-feather="arrow-left" aria-hidden="true"></i>
+                                <span>Back to Role Selection</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

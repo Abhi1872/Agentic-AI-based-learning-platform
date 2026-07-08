@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Learning Games - Agentic{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i data-feather="gamepad-2" class="me-2"></i>Learning Games
+            </h1>
+            <p class="text-muted mb-0">Fun games to practice what you've learned!</p>
+        </div>
+        <div class="d-flex gap-3">
+            <div class="badge bg-warning text-dark fs-5 p-3">
+                <i data-feather="star" class="me-1"></i>{{ total_stars }} Stars
+            </div>
+            <div class="badge bg-info fs-5 p-3">
+                <i data-feather="circle" class="me-1"></i>{{ total_coins }} Coins
+            </div>
+        </div>
+    </div>
+
+    {% if not can_play %}
+    <div class="alert alert-info alert-lg d-flex align-items-center" role="alert" style="font-size: 1.2rem; padding: 2rem;">
+        <i data-feather="lock" class="me-3" style="width: 48px; height: 48px;"></i>
+        <div>
+            <h4 class="alert-heading mb-2">Games are Locked</h4>
+            <p class="mb-0">Complete <strong>{{ quizzes_needed }} more quiz{{ 'zes' if quizzes_needed > 1 else '' }}</strong> to unlock all the fun games!</p>
+            <p class="mb-0 mt-2">You've completed {{ quizzes_completed }} quiz{{ 'zes' if quizzes_completed != 1 else '' }} so far. Keep going!</p>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg mt-3">
+                <i data-feather="book-open" class="me-2"></i>Go to Lessons
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        {% for game in games %}
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 game-card {% if not can_play %}opacity-50{% endif %}" style="border-radius: 20px;">
+                <div class="card-body text-center p-4">
+                    <div class="game-icon mb-3 bg-{{ game.color_theme }} text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i data-feather="{{ game.icon }}" style="width: 40px; height: 40px;"></i>
+                    </div>
+                    <h3 class="card-title h4">{{ game.name }}</h3>
+                    <p class="card-text text-muted">{{ game.description }}</p>
+                    <div class="mb-3">
+                        <span class="badge bg-success me-1">+{{ game.base_coins }} coins</span>
+                        <span class="badge bg-warning text-dark">+{{ game.base_stars }} star</span>
+                    </div>
+                    {% if can_play %}
+                    <a href="{{ url_for('play_game', game_id=game.id) }}" class="btn btn-{{ game.color_theme }} btn-lg w-100" style="min-height: 60px; font-size: 1.2rem;">
+                        <i data-feather="play" class="me-2"></i>Play Now
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary btn-lg w-100" disabled style="min-height: 60px; font-size: 1.2rem;">
+                        <i data-feather="lock" class="me-2"></i>Locked
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if rewards %}
+    <div class="mt-5">
+        <h2 class="h3 mb-4">
+            <i data-feather="award" class="me-2"></i>Your Rewards
+        </h2>
+        <div class="row g-3">
+            {% for reward in rewards %}
+            <div class="col-md-4 col-lg-3">
+                <div class="card border-warning" style="border-radius: 15px;">
+                    <div class="card-body text-center p-3">
+                        <i data-feather="{{ reward.reward_icon }}" class="text-warning mb-2" style="width: 32px; height: 32px;"></i>
+                        <h5 class="card-title mb-1">{{ reward.reward_name }}</h5>
+                        <small class="text-muted">{{ reward.description }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.game-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.game-card:hover:not(.opacity-50) {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - NeuroAid Learning{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100 py-5">
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="text-center mb-5">
+                    <div class="brand-logo mb-4">
+                        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="40" cy="40" r="36" stroke="#4F46E5" stroke-width="4"/>
+                            <path d="M24 40L34 50L56 28" stroke="#4F46E5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h1 class="display-4 fw-bold text-primary">NeuroAid</h1>
+                    <p class="lead text-muted">Agentic AI Based Learning Platform</p>
+                    <p class="text-secondary">Personalized learning for every ability</p>
+                </div>
+                
+                <div class="row g-4 justify-content-center">
+                    <div class="col-12 col-md-4">
+                        <a href="{{ url_for('student_login_page') }}" class="text-decoration-none">
+                            <div class="card shadow-lg border-0 h-100 role-card">
+                                <div class="card-body text-center p-5">
+                                    <div class="role-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 100px; height: 100px;">
+                                        <i data-feather="book-open" class="text-primary" style="width: 48px; height: 48px;"></i>
+                                    </div>
+                                    <h2 class="h4 text-dark mb-3">Student</h2>
+                                    <p class="text-muted mb-0">Access lessons, quizzes, games and track your progress</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-12 col-md-4">
+                        <a href="{{ url_for('teacher_login_page') }}" class="text-decoration-none">
+                            <div class="card shadow-lg border-0 h-100 role-card">
+                                <div class="card-body text-center p-5">
+                                    <div class="role-icon bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 100px; height: 100px;">
+                                        <i data-feather="clipboard" class="text-success" style="width: 48px; height: 48px;"></i>
+                                    </div>
+                                    <h2 class="h4 text-dark mb-3">Teacher</h2>
+                                    <p class="text-muted mb-0">Manage students, view performance and track attendance</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-12 col-md-4">
+                        <a href="{{ url_for('parent_login') }}" class="text-decoration-none">
+                            <div class="card shadow-lg border-0 h-100 role-card">
+                                <div class="card-body text-center p-5">
+                                    <div class="role-icon bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 100px; height: 100px;">
+                                        <i data-feather="users" class="text-warning" style="width: 48px; height: 48px;"></i>
+                                    </div>
+                                    <h2 class="h4 text-dark mb-3">Parent</h2>
+                                    <p class="text-muted mb-0">View your child's progress, scores and learning journey</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-5">
+                    <a href="{{ url_for('help_page') }}" class="text-muted text-decoration-none">
+                        <i data-feather="help-circle" aria-hidden="true"></i>
+                        <span>Need help? View accessibility options</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.role-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+.role-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+}
+</style>
+{% endblock %}

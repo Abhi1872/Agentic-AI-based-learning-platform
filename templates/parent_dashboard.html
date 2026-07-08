@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+
+{% block title %}Parent Dashboard - Agentic{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 15px;
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .child-section {
+        border-left: 5px solid #667eea;
+        margin-bottom: 2rem;
+    }
+    .progress {
+        height: 20px;
+        border-radius: 10px;
+    }
+    .indicator-card {
+        border-left: 4px solid;
+        transition: all 0.3s;
+    }
+    .indicator-card:hover {
+        transform: translateX(5px);
+    }
+    .audio-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fs-4" href="#">
+            <i data-feather="users" class="me-2 text-warning"></i>Parent Portal
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="fs-5">{{ parent.name }}</span>
+            <button class="btn btn-outline-primary" onclick="toggleAudioMode()" title="Audio Mode">
+                <i data-feather="volume-2" id="audioIcon"></i>
+            </button>
+            <a href="{{ url_for('parent_logout') }}" class="btn btn-outline-danger">
+                <i data-feather="log-out"></i> Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">
+            <i data-feather="bar-chart-2" class="me-2 text-primary"></i>Your Child's Progress
+        </h1>
+        <div>
+            <button class="btn btn-outline-secondary me-2" onclick="speakSummary()">
+                <i data-feather="play" class="me-1"></i>Listen to Summary
+            </button>
+        </div>
+    </div>
+
+    {% if not students_data %}
+    <div class="alert alert-info fs-5">
+        <i data-feather="info" class="me-2"></i>
+        No students linked to your account yet. Please contact the school administrator.
+    </div>
+    {% endif %}
+
+    {% for data in students_data %}
+    <div class="card child-section mb-4" data-child-name="{{ data.student.name }}">
+        <div class="card-header bg-primary text-white py-3">
+            <h2 class="h4 mb-0">
+                <i data-feather="user" class="me-2"></i>{{ data.student.name }}
+                <span class="badge bg-light text-primary ms-2">{{ data.student.student_id }}</span>
+                <span class="badge bg-{{ 'success' if data.student.current_difficulty == 'easy' else ('warning' if data.student.current_difficulty == 'medium' else 'info') }} ms-2">
+                    {{ data.student.current_difficulty | title }} Level
+                </span>
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="row g-4 mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="card stat-card bg-success text-white h-100">
+                        <div class="stat-number">{{ data.completed_lessons }}</div>
+                        <div>Lessons Completed</div>
+                        <small>of {{ data.total_lessons }} total</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card stat-card bg-info text-white h-100">
+                        <div class="stat-number">{{ data.student.total_quizzes_taken }}</div>
+                        <div>Quizzes Taken</div>
+                        <small>Avg: {{ data.student.average_score | round(1) }}%</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card stat-card bg-warning text-dark h-100">
+                        <div class="stat-number">{{ data.attendance_rate | round(0) }}%</div>
+                        <div>Attendance</div>
+                        <small>This week</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card stat-card bg-secondary text-white h-100">
+                        <div class="stat-number">{{ data.student.streak_days }}</div>
+                        <div>Day Streak</div>
+                        <small>Keep it up!</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0">
+                                <i data-feather="award" class="me-2 text-warning"></i>Games & Rewards
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {% if data.games_unlocked %}
+                            <div class="alert alert-success mb-3">
+                                <i data-feather="unlock" class="me-2"></i>
+                                <strong>Games Unlocked!</strong> Your child has completed enough quizzes to access educational games.
+                            </div>
+                            {% else %}
+                            <div class="alert alert-warning mb-3">
+                                <i data-feather="lock" class="me-2"></i>
+                                <strong>Games Locked</strong> - Needs {{ max(0, 2 - data.student.total_quizzes_taken) }} more quiz(zes) to unlock.
+                            </div>
+                            {% endif %}
+                            <div class="d-flex gap-3 flex-wrap">
+                                <div class="badge bg-info text-white fs-5 p-3">
+                                    <i data-feather="circle" class="me-1"></i>{{ data.total_coins }} Coins
+                                </div>
+                                <div class="badge bg-warning text-dark fs-5 p-3">
+                                    <i data-feather="star" class="me-1"></i>{{ data.total_stars }} Stars
+                                </div>
+                            </div>
+                            {% if data.badges %}
+                            <div class="mt-3">
+                                <strong>Badges Earned:</strong>
+                                <div class="d-flex gap-2 flex-wrap mt-2">
+                                    {% for badge in data.badges %}
+                                    <span class="badge bg-primary p-2">
+                                        <i data-feather="{{ badge.icon }}" style="width: 16px; height: 16px;"></i>
+                                        {{ badge.name }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0">
+                                <i data-feather="trending-up" class="me-2 text-success"></i>Strengths & Areas to Improve
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {% if data.strengths %}
+                            <div class="mb-3">
+                                <h4 class="h6 text-success mb-2">
+                                    <i data-feather="check-circle" class="me-1"></i>Strengths:
+                                </h4>
+                                <ul class="list-unstyled">
+                                    {% for strength in data.strengths %}
+                                    <li class="mb-1">
+                                        <span class="badge bg-success-subtle text-success">{{ strength }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            {% if data.improvements %}
+                            <div>
+                                <h4 class="h6 text-warning mb-2">
+                                    <i data-feather="alert-circle" class="me-1"></i>Needs More Practice:
+                                </h4>
+                                <ul class="list-unstyled">
+                                    {% for area in data.improvements %}
+                                    <li class="mb-1">
+                                        <span class="badge bg-warning-subtle text-warning">{{ area }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            {% if not data.strengths and not data.improvements %}
+                            <p class="text-muted text-center mb-0">
+                                <i data-feather="info" class="me-2"></i>
+                                Complete more quizzes to see detailed analysis.
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card indicator-card h-100" style="border-left-color: #6366f1;">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0">
+                                <i data-feather="target" class="me-2 text-primary"></i>Focus Indicator (ADHD Support)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Average Focus Score:</span>
+                                <strong class="text-{{ 'success' if data.avg_focus >= 0.7 else ('warning' if data.avg_focus >= 0.4 else 'danger') }}">
+                                    {{ (data.avg_focus * 100) | round(0) }}%
+                                </strong>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-{{ 'success' if data.avg_focus >= 0.7 else ('warning' if data.avg_focus >= 0.4 else 'danger') }}" 
+                                     style="width: {{ (data.avg_focus * 100) | int }}%">
+                                </div>
+                            </div>
+                            <div class="alert alert-{{ 'success' if data.avg_focus >= 0.7 else ('warning' if data.avg_focus >= 0.4 else 'info') }} mb-0">
+                                {% if data.avg_focus >= 0.7 %}
+                                <i data-feather="check-circle" class="me-2"></i>
+                                <strong>Excellent focus!</strong> Short, engaging activities help maintain attention.
+                                {% elif data.avg_focus >= 0.4 %}
+                                <i data-feather="alert-triangle" class="me-2"></i>
+                                <strong>Good progress</strong> with some distractions. Consider shorter study sessions with breaks.
+                                {% else %}
+                                <i data-feather="info" class="me-2"></i>
+                                <strong>Suggestion:</strong> More frequent breaks and interactive content may help improve focus.
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card indicator-card h-100" style="border-left-color: #ec4899;">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0">
+                                <i data-feather="book-open" class="me-2 text-danger"></i>Reading Progress (Dyslexia Support)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Average Reading Speed:</span>
+                                <strong>{{ data.avg_wpm | round(0) }} words/min</strong>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-info" style="width: {{ min((data.avg_wpm / 150 * 100), 100) | int }}%">
+                                </div>
+                            </div>
+                            <div class="alert alert-{{ 'success' if data.avg_wpm >= 100 else ('info' if data.avg_wpm >= 50 else 'warning') }} mb-0">
+                                {% if data.avg_wpm >= 100 %}
+                                <i data-feather="check-circle" class="me-2"></i>
+                                <strong>Reading well!</strong> Keep encouraging regular reading activities.
+                                {% elif data.avg_wpm >= 50 %}
+                                <i data-feather="info" class="me-2"></i>
+                                <strong>Progressing well.</strong> Text-to-speech audio support is available and may help.
+                                {% else %}
+                                <i data-feather="volume-2" class="me-2"></i>
+                                <strong>Tip:</strong> Enable audio mode for all lessons to support reading comprehension.
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0">
+                                <i data-feather="calendar" class="me-2 text-primary"></i>Attendance Summary
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="h3 text-success mb-0">{{ data.attendance_present }}</div>
+                                    <small class="text-muted">Present</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="h3 text-danger mb-0">{{ data.attendance_absent }}</div>
+                                    <small class="text-muted">Absent</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="h3 text-warning mb-0">{{ data.attendance_late }}</div>
+                                    <small class="text-muted">Late</small>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="text-center">
+                                <span class="fs-5">Weekly Attendance: </span>
+                                <span class="badge bg-{{ 'success' if data.attendance_rate >= 80 else ('warning' if data.attendance_rate >= 60 else 'danger') }} fs-5 p-2">
+                                    {{ data.attendance_rate | round(0) }}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0">
+                                <i data-feather="trending-up" class="me-2 text-success"></i>Weekly Progress Report
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Lessons This Week:</span>
+                                    <strong>{{ data.weekly_lessons }}</strong>
+                                </div>
+                                <div class="progress mt-1" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: {{ min(data.weekly_lessons * 20, 100) }}%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Quizzes This Week:</span>
+                                    <strong>{{ data.weekly_quizzes }}</strong>
+                                </div>
+                                <div class="progress mt-1" style="height: 8px;">
+                                    <div class="progress-bar bg-info" style="width: {{ min(data.weekly_quizzes * 20, 100) }}%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Games Played This Week:</span>
+                                    <strong>{{ data.weekly_games }}</strong>
+                                </div>
+                                <div class="progress mt-1" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" style="width: {{ min(data.weekly_games * 20, 100) }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h3 class="h5 mb-0">
+                        <i data-feather="activity" class="me-2 text-info"></i>Learning Improvement Indicators
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="p-3 rounded bg-light">
+                                <i data-feather="trending-{{ 'up' if data.score_trend >= 0 else 'down' }}" 
+                                   class="text-{{ 'success' if data.score_trend >= 0 else 'danger' }} mb-2" 
+                                   style="width: 48px; height: 48px;"></i>
+                                <h4 class="h6">Quiz Score Trend</h4>
+                                <span class="badge bg-{{ 'success' if data.score_trend >= 0 else 'danger' }} fs-6">
+                                    {{ '+' if data.score_trend >= 0 else '' }}{{ data.score_trend | round(1) }}%
+                                </span>
+                                <p class="text-muted small mb-0">vs last week</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="p-3 rounded bg-light">
+                                <i data-feather="clock" class="text-primary mb-2" style="width: 48px; height: 48px;"></i>
+                                <h4 class="h6">Avg Session Time</h4>
+                                <span class="badge bg-primary fs-6">{{ data.avg_session_time }} min</span>
+                                <p class="text-muted small mb-0">per learning session</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="p-3 rounded bg-light">
+                                <i data-feather="award" class="text-warning mb-2" style="width: 48px; height: 48px;"></i>
+                                <h4 class="h6">Difficulty Level</h4>
+                                <span class="badge bg-{{ 'success' if data.student.current_difficulty == 'easy' else ('warning' if data.student.current_difficulty == 'medium' else 'info') }} fs-6">
+                                    {{ data.student.current_difficulty | title }}
+                                </span>
+                                <p class="text-muted small mb-0">current level</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if data.quiz_results %}
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">
+                        <i data-feather="list" class="me-2 text-secondary"></i>Recent Quiz Results
+                    </h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Score</th>
+                                    <th>Difficulty</th>
+                                    <th>Time Spent</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in data.quiz_results[:10] %}
+                                <tr>
+                                    <td>{{ result.completed_at.strftime('%b %d, %Y') }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if result.score >= 80 else ('warning' if result.score >= 60 else 'danger') }} fs-6">
+                                            {{ result.score | round(0) }}%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ result.difficulty_at_time | title }}</span>
+                                    </td>
+                                    <td>{{ result.time_spent // 60 }}:{{ '%02d' | format(result.time_spent % 60) }}</td>
+                                    <td>
+                                        {% if result.score >= 80 %}
+                                        <i data-feather="star" class="text-warning"></i> Excellent
+                                        {% elif result.score >= 60 %}
+                                        <i data-feather="thumbs-up" class="text-success"></i> Good
+                                        {% else %}
+                                        <i data-feather="book" class="text-info"></i> Keep Practicing
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<button class="btn btn-primary audio-btn shadow-lg" onclick="toggleAudioMode()" title="Toggle Audio Mode" id="floatingAudioBtn">
+    <i data-feather="volume-2" style="width: 24px; height: 24px;"></i>
+</button>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let audioEnabled = false;
+let currentUtterance = null;
+
+function toggleAudioMode() {
+    audioEnabled = !audioEnabled;
+    const btn = document.getElementById('floatingAudioBtn');
+    if (audioEnabled) {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-success');
+        speakText('Audio mode enabled. I will read content aloud for you.');
+    } else {
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-primary');
+        speechSynthesis.cancel();
+    }
+}
+
+function speakText(text) {
+    if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    speechSynthesis.speak(utterance);
+}
+
+function speakSummary() {
+    const children = document.querySelectorAll('.child-section');
+    let summary = 'Here is a summary of your children\'s progress. ';
+    
+    children.forEach(child => {
+        const name = child.getAttribute('data-child-name');
+        const stats = child.querySelectorAll('.stat-number');
+        if (stats.length >= 4) {
+            summary += `${name} has completed ${stats[0].textContent} lessons, `;
+            summary += `taken ${stats[1].textContent} quizzes, `;
+            summary += `has ${stats[2].textContent} attendance rate, `;
+            summary += `and is on a ${stats[3].textContent} day streak. `;
+        }
+    });
+    
+    speakText(summary);
+}
+
+document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', function() {
+        if (audioEnabled) {
+            const text = this.innerText.substring(0, 500);
+            speakText(text);
+        }
+    });
+});
+</script>
+{% endblock %}

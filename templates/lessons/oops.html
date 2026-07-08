@@ -1,0 +1,105 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Object-Oriented Programming{% endblock %}
+{% block lesson_heading %}Object-Oriented Programming{% endblock %}
+{% block lesson_description %}Learn how to organize code using objects and classes{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section">
+    {% if difficulty == 'beginner' %}
+    <h2>What is Object-Oriented Programming?</h2>
+    <p class="lead">Object-Oriented Programming (OOP) is a way to organize your code by grouping related things together. It's like organizing your toys into different boxes!</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Think of a class as a cookie cutter and objects as the cookies you make with it!
+    </div>
+
+    <h3>A Simple Class</h3>
+    <p>Here's how to create a simple "Dog" class:</p>
+    
+    <div class="code-example">
+        <pre>class Dog:
+    def __init__(self, name):
+        self.name = name
+    
+    def bark(self):
+        print(f"{self.name} says: Woof!")
+
+my_dog = Dog("Buddy")
+my_dog.bark()  # Output: Buddy says: Woof!</pre>
+    </div>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Object-Oriented Programming Principles</h2>
+    <p class="lead">OOP is a programming paradigm based on the concept of objects, which can contain data and code. The four main principles are encapsulation, abstraction, inheritance, and polymorphism.</p>
+    
+    <h3>The Four Pillars of OOP</h3>
+    <ul>
+        <li><strong>Encapsulation:</strong> Bundling data and methods together</li>
+        <li><strong>Abstraction:</strong> Hiding complex implementation details</li>
+        <li><strong>Inheritance:</strong> Creating new classes from existing ones</li>
+        <li><strong>Polymorphism:</strong> Using the same interface for different types</li>
+    </ul>
+
+    <h3>Example: Inheritance</h3>
+    <div class="code-example">
+        <pre>class Animal:
+    def __init__(self, name):
+        self.name = name
+    
+    def speak(self):
+        pass
+
+class Dog(Animal):
+    def speak(self):
+        return f"{self.name} barks!"
+
+class Cat(Animal):
+    def speak(self):
+        return f"{self.name} meows!"</pre>
+    </div>
+
+    {% else %}
+    <h2>Advanced Object-Oriented Design</h2>
+    <p class="lead">Mastering OOP involves understanding design patterns, SOLID principles, and how to architect maintainable and scalable software systems.</p>
+    
+    <h3>SOLID Principles</h3>
+    <ul>
+        <li><strong>S:</strong> Single Responsibility Principle</li>
+        <li><strong>O:</strong> Open/Closed Principle</li>
+        <li><strong>L:</strong> Liskov Substitution Principle</li>
+        <li><strong>I:</strong> Interface Segregation Principle</li>
+        <li><strong>D:</strong> Dependency Inversion Principle</li>
+    </ul>
+
+    <h3>Example: Factory Pattern</h3>
+    <div class="code-example">
+        <pre>from abc import ABC, abstractmethod
+
+class PaymentProcessor(ABC):
+    @abstractmethod
+    def process(self, amount: float) -> bool:
+        pass
+
+class CreditCardProcessor(PaymentProcessor):
+    def process(self, amount: float) -> bool:
+        print(f"Processing ${amount} via Credit Card")
+        return True
+
+class PaymentFactory:
+    @staticmethod
+    def create(method: str) -> PaymentProcessor:
+        processors = {"credit_card": CreditCardProcessor}
+        return processors.get(method, CreditCardProcessor)()</pre>
+    </div>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Visual Diagram</h3>
+    <div class="diagram-placeholder">
+        <span><i data-feather="box"></i> Class Hierarchy Diagram</span>
+    </div>
+</div>
+{% endblock %}

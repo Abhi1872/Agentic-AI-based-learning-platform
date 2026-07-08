@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance - Teacher Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i data-feather="calendar" class="me-2 text-primary"></i>Student Attendance
+            </h1>
+            <p class="text-muted mb-0">{{ today.strftime('%A, %B %d, %Y') }}</p>
+        </div>
+        <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-outline-secondary">
+            <i data-feather="arrow-left" class="me-1"></i>Back to Dashboard
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('teacher_mark_attendance') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{ student.student_id }}</td>
+                                <td><strong>{{ student.name }}</strong></td>
+                                <td>
+                                    <select class="form-select" name="status_{{ student.id }}">
+                                        <option value="present" {% if attendance_records.get(student.id) == 'present' %}selected{% endif %}>Present</option>
+                                        <option value="absent" {% if attendance_records.get(student.id) == 'absent' %}selected{% endif %}>Absent</option>
+                                        <option value="late" {% if attendance_records.get(student.id) == 'late' %}selected{% endif %}>Late</option>
+                                        <option value="excused" {% if attendance_records.get(student.id) == 'excused' %}selected{% endif %}>Excused</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" name="notes_{{ student.id }}" placeholder="Optional notes">
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No students registered yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if students %}
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i data-feather="check" class="me-2"></i>Save Attendance
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

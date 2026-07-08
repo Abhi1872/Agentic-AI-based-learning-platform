@@ -1,0 +1,85 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Networking{% endblock %}
+{% block lesson_heading %}Computer Networking{% endblock %}
+{% block lesson_description %}Learn how computers communicate with each other{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section">
+    {% if difficulty == 'beginner' %}
+    <h2>What is Networking?</h2>
+    <p class="lead">Networking is how computers talk to each other. Just like you use a phone to call your friends, computers use networks to send messages!</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Think of the internet like a giant postal system - your messages travel through many stops to reach their destination!
+    </div>
+
+    <h3>IP Address - Your Computer's Address</h3>
+    <p>Every computer has a special number called an IP address:</p>
+    
+    <div class="code-example">
+        <pre>Your computer's address: 192.168.1.1
+Google's address: 8.8.8.8</pre>
+    </div>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Networking Fundamentals</h2>
+    <p class="lead">Computer networking involves connecting devices to share resources and communicate using standardized protocols like TCP/IP.</p>
+    
+    <h3>The OSI Model Layers</h3>
+    <ul>
+        <li><strong>Application:</strong> HTTP, FTP, SMTP</li>
+        <li><strong>Transport:</strong> TCP, UDP</li>
+        <li><strong>Network:</strong> IP, ICMP</li>
+        <li><strong>Data Link:</strong> Ethernet, Wi-Fi</li>
+        <li><strong>Physical:</strong> Cables, Radio waves</li>
+    </ul>
+
+    <h3>Example: Making an HTTP Request</h3>
+    <div class="code-example">
+        <pre>import requests
+
+response = requests.get("https://api.example.com/data")
+print(response.status_code)  # 200 means success
+print(response.json())</pre>
+    </div>
+
+    {% else %}
+    <h2>Advanced Network Architecture</h2>
+    <p class="lead">Modern network engineering requires understanding routing algorithms, network security, load balancing, and distributed systems communication.</p>
+    
+    <h3>Network Security Concepts</h3>
+    <ul>
+        <li><strong>TLS/SSL:</strong> Encrypted communication</li>
+        <li><strong>Firewalls:</strong> Packet filtering and inspection</li>
+        <li><strong>VPN:</strong> Secure tunneling protocols</li>
+        <li><strong>DDoS Protection:</strong> Rate limiting and filtering</li>
+    </ul>
+
+    <h3>Example: Socket Programming</h3>
+    <div class="code-example">
+        <pre>import socket
+
+def create_server():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(('localhost', 8080))
+    server.listen(5)
+    
+    while True:
+        client, addr = server.accept()
+        data = client.recv(1024)
+        client.send(b"HTTP/1.1 200 OK\r\n\r\nHello!")
+        client.close()</pre>
+    </div>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Visual Diagram</h3>
+    <div class="diagram-placeholder">
+        <span><i data-feather="wifi"></i> Network Topology</span>
+    </div>
+</div>
+{% endblock %}

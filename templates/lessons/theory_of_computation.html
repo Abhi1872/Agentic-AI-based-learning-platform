@@ -1,0 +1,155 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Theory of Computation{% endblock %}
+{% block lesson_heading %}Theory of Computation{% endblock %}
+{% block lesson_description %}Explore the mathematical foundations of what computers can and cannot compute{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section" id="lesson-audio-content">
+    {% if difficulty == 'beginner' %}
+    <h2>What is Theory of Computation?</h2>
+    <p class="lead">Theory of Computation studies what problems computers can solve and how efficiently they can solve them. It's the mathematical foundation of computer science.</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Just like math has rules, computers have rules about what they can and can't do. This field studies those rules.
+    </div>
+
+    <h3>Three Main Questions</h3>
+    <ol>
+        <li><strong>What is computation?</strong> Formal models of computing</li>
+        <li><strong>What can be computed?</strong> Decidability and computability</li>
+        <li><strong>How efficiently?</strong> Complexity theory</li>
+    </ol>
+
+    <h3>Simple Machines</h3>
+    <p>We use abstract machines to understand computation:</p>
+    <ul>
+        <li><strong>Finite Automata:</strong> Like a vending machine with states</li>
+        <li><strong>Pushdown Automata:</strong> Can remember things in a stack</li>
+        <li><strong>Turing Machine:</strong> Can solve any computable problem</li>
+    </ul>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Automata Theory</h2>
+    <p class="lead">Understanding formal languages and the machines that recognize them.</p>
+    
+    <h3>Chomsky Hierarchy</h3>
+    <div class="code-example">
+        <pre>Type 0: Recursively Enumerable → Turing Machine
+Type 1: Context-Sensitive      → Linear Bounded Automaton
+Type 2: Context-Free           → Pushdown Automaton
+Type 3: Regular                → Finite Automaton</pre>
+    </div>
+
+    <h3>Finite Automata</h3>
+    <div class="code-example">
+        <pre>DFA for strings ending in "01":
+States: {q0, q1, q2}
+Alphabet: {0, 1}
+Start: q0
+Accept: {q2}
+
+Transitions:
+     0    1
+q0   q1   q0
+q1   q1   q2
+q2   q1   q0
+
+Example: "1101" → q0→q0→q0→q1→q2 ✓</pre>
+    </div>
+
+    <h3>Regular Expressions</h3>
+    <p>Equivalent to finite automata:</p>
+    <div class="code-example">
+        <pre>Pattern: (0|1)*01
+Matches: "01", "101", "0001", "1101"
+
+Regex operators:
+* (Kleene star): zero or more
++ (plus): one or more
+? (optional): zero or one
+| (union): either/or</pre>
+    </div>
+
+    <h3>Context-Free Grammars</h3>
+    <div class="code-example">
+        <pre>Grammar for balanced parentheses:
+S → (S) | SS | ε
+
+Derivation of "(())":
+S → (S) → ((S)) → (())</pre>
+    </div>
+
+    {% else %}
+    <h2>Advanced Computability and Complexity</h2>
+    <p class="lead">Exploring undecidability, complexity classes, and the limits of computation.</p>
+    
+    <h3>The Halting Problem</h3>
+    <p>Proven undecidable by Alan Turing using diagonalization:</p>
+    <div class="code-example">
+        <pre>Theorem: There is no algorithm that can determine
+whether an arbitrary program will halt on a given input.
+
+Proof by contradiction:
+1. Assume HALT(P, I) exists, returns true/false
+2. Construct D(P):
+   if HALT(P, P) then loop_forever()
+   else return true
+3. What is D(D)?
+   - If HALT(D, D)=true → D loops → contradiction
+   - If HALT(D, D)=false → D halts → contradiction
+∴ HALT cannot exist</pre>
+    </div>
+
+    <h3>Complexity Classes</h3>
+    <div class="code-example">
+        <pre>P:     Polynomial time (efficiently solvable)
+       Examples: Sorting, MST, Shortest Path
+
+NP:    Nondeterministic Polynomial (verifiable)
+       Examples: SAT, Clique, Vertex Cover
+
+NP-Complete: Hardest in NP
+       - In NP
+       - Every NP problem reduces to it
+
+NP-Hard: At least as hard as NP-Complete
+       May not be in NP
+
+Open Question: P = NP?</pre>
+    </div>
+
+    <h3>Reductions</h3>
+    <div class="code-example">
+        <pre>3-SAT ≤p CLIQUE ≤p VERTEX-COVER ≤p SET-COVER
+
+If you can solve B in polynomial time,
+and A ≤p B (A reduces to B),
+then you can solve A in polynomial time.
+
+Cook-Levin Theorem: SAT is NP-Complete</pre>
+    </div>
+
+    <h3>Space Complexity</h3>
+    <ul>
+        <li><strong>L:</strong> Logarithmic space</li>
+        <li><strong>NL:</strong> Nondeterministic log space</li>
+        <li><strong>PSPACE:</strong> Polynomial space</li>
+        <li><strong>EXPTIME:</strong> Exponential time</li>
+    </ul>
+    <p>Hierarchy: L ⊆ NL ⊆ P ⊆ NP ⊆ PSPACE ⊆ EXPTIME</p>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Key Takeaways</h3>
+    <div class="alert alert-success">
+        <ul class="mb-0">
+            <li>Some problems are fundamentally unsolvable by any computer</li>
+            <li>Complexity theory helps classify problem difficulty</li>
+            <li>The P vs NP question remains one of the biggest open problems</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

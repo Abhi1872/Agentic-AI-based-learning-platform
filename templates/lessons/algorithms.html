@@ -1,0 +1,169 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Algorithms{% endblock %}
+{% block lesson_heading %}Algorithms{% endblock %}
+{% block lesson_description %}Master algorithm design and analysis for efficient problem solving{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section" id="lesson-audio-content">
+    {% if difficulty == 'beginner' %}
+    <h2>What are Algorithms?</h2>
+    <p class="lead">An algorithm is a step-by-step procedure to solve a problem. Think of it like a recipe that tells you exactly what to do to achieve a result.</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Just like following directions to get somewhere, an algorithm gives the computer clear instructions to solve problems.
+    </div>
+
+    <h3>Why Algorithms Matter</h3>
+    <p>Algorithms help us:</p>
+    <ul>
+        <li>Solve problems efficiently</li>
+        <li>Save computer time and memory</li>
+        <li>Handle large amounts of data</li>
+        <li>Make better software</li>
+    </ul>
+
+    <h3>Simple Example: Finding the Largest Number</h3>
+    <div class="code-example">
+        <pre>def find_largest(numbers):
+    largest = numbers[0]
+    for num in numbers:
+        if num > largest:
+            largest = num
+    return largest
+
+result = find_largest([3, 7, 2, 9, 5])
+print(f"The largest number is: {result}")</pre>
+    </div>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Algorithm Analysis and Design</h2>
+    <p class="lead">Understanding how to analyze algorithm efficiency using Big O notation and common algorithm design paradigms.</p>
+    
+    <h3>Time Complexity: Big O Notation</h3>
+    <p>Big O describes how an algorithm's runtime grows as input size increases:</p>
+    <ul>
+        <li><strong>O(1):</strong> Constant time - doesn't depend on input size</li>
+        <li><strong>O(log n):</strong> Logarithmic - halves the problem each step</li>
+        <li><strong>O(n):</strong> Linear - grows proportionally with input</li>
+        <li><strong>O(n log n):</strong> Log-linear - efficient sorting algorithms</li>
+        <li><strong>O(n²):</strong> Quadratic - nested loops over input</li>
+    </ul>
+
+    <h3>Sorting Algorithms</h3>
+    <div class="code-example">
+        <pre>def merge_sort(arr):
+    """Merge Sort - O(n log n) time complexity"""
+    if len(arr) <= 1:
+        return arr
+    
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    
+    return merge(left, right)
+
+def merge(left, right):
+    result = []
+    i = j = 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result</pre>
+    </div>
+
+    <h3>Searching Algorithms</h3>
+    <div class="code-example">
+        <pre>def binary_search(arr, target):
+    """Binary Search - O(log n) time complexity"""
+    left, right = 0, len(arr) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    
+    return -1  # Not found</pre>
+    </div>
+
+    {% else %}
+    <h2>Advanced Algorithm Design and Analysis</h2>
+    <p class="lead">Exploring advanced algorithm paradigms including dynamic programming, greedy algorithms, graph algorithms, and NP-completeness.</p>
+    
+    <h3>Dynamic Programming</h3>
+    <p>Dynamic programming solves complex problems by breaking them into overlapping subproblems and storing their solutions.</p>
+    
+    <div class="code-example">
+        <pre>def longest_common_subsequence(text1, text2):
+    """LCS using Dynamic Programming - O(mn) time and space"""
+    m, n = len(text1), len(text2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if text1[i-1] == text2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    
+    return dp[m][n]</pre>
+    </div>
+
+    <h3>Graph Algorithms</h3>
+    <div class="code-example">
+        <pre>from collections import deque
+
+def dijkstra(graph, start):
+    """Dijkstra's Shortest Path - O((V+E) log V)"""
+    import heapq
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    pq = [(0, start)]
+    
+    while pq:
+        curr_dist, curr_node = heapq.heappop(pq)
+        if curr_dist > distances[curr_node]:
+            continue
+        
+        for neighbor, weight in graph[curr_node].items():
+            distance = curr_dist + weight
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                heapq.heappush(pq, (distance, neighbor))
+    
+    return distances</pre>
+    </div>
+
+    <h3>NP-Completeness</h3>
+    <p>Understanding computational complexity classes:</p>
+    <ul>
+        <li><strong>P:</strong> Problems solvable in polynomial time</li>
+        <li><strong>NP:</strong> Problems verifiable in polynomial time</li>
+        <li><strong>NP-Complete:</strong> Hardest problems in NP</li>
+        <li><strong>NP-Hard:</strong> At least as hard as NP-Complete</li>
+    </ul>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Key Takeaways</h3>
+    <div class="alert alert-success">
+        <ul class="mb-0">
+            <li>Algorithms are fundamental to efficient computing</li>
+            <li>Time and space complexity analysis guides optimization</li>
+            <li>Different paradigms suit different problem types</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}{{ game.name }} - Agentic{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{{ url_for('games') }}" class="btn btn-outline-secondary btn-lg me-3">
+                <i data-feather="arrow-left"></i>
+            </a>
+            <span class="h2">{{ game.name }}</span>
+        </div>
+        <div class="d-flex gap-3 align-items-center">
+            <span class="badge bg-info fs-5 p-2">Level {{ difficulty }}</span>
+            <span id="timer" class="badge bg-secondary fs-5 p-2">0:00</span>
+        </div>
+    </div>
+
+    <div class="card" style="border-radius: 20px; min-height: 400px;">
+        <div class="card-body p-4">
+            <div class="text-center mb-4">
+                <p class="lead">{{ game.instructions }}</p>
+            </div>
+
+            <div id="game-area" class="game-container">
+                {% if game.game_type == 'matching' %}
+                <div class="matching-game">
+                    <p class="text-center mb-4 fs-5">Click on cards to find matching pairs!</p>
+                    <div class="row g-3 justify-content-center" id="matching-cards">
+                        {% for term, definition in game_data.pairs %}
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="match-card" data-pair="{{ loop.index }}" data-type="term" onclick="flipCard(this)">
+                                <div class="card-inner">
+                                    <div class="card-front">?</div>
+                                    <div class="card-back">{{ term }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="match-card" data-pair="{{ loop.index }}" data-type="definition" onclick="flipCard(this)">
+                                <div class="card-inner">
+                                    <div class="card-front">?</div>
+                                    <div class="card-back">{{ definition }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% elif game.game_type == 'sequence' %}
+                <div class="sequence-game">
+                    <p class="text-center mb-4 fs-5">Drag the items to put them in the correct order!</p>
+                    <div id="sortable-list" class="list-group mx-auto" style="max-width: 500px;">
+                        {% for item in game_data.sequence | shuffle %}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center fs-5 p-3" draggable="true" data-correct="{{ loop.index }}">
+                            <span><i data-feather="menu" class="me-3"></i>{{ item }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-success btn-lg" onclick="checkSequence()">
+                            <i data-feather="check" class="me-2"></i>Check Order
+                        </button>
+                    </div>
+                </div>
+                {% elif game.game_type == 'memory' %}
+                <div class="memory-game">
+                    <p class="text-center mb-4 fs-5">Find matching pairs of cards!</p>
+                    <div class="row g-3 justify-content-center" id="memory-cards">
+                        {% for card in (game_data.cards + game_data.cards) | shuffle %}
+                        <div class="col-4 col-md-3 col-lg-2">
+                            <div class="memory-card" data-value="{{ card }}" onclick="flipMemoryCard(this)">
+                                <div class="card-inner">
+                                    <div class="card-front">
+                                        <i data-feather="help-circle" style="width: 40px; height: 40px;"></i>
+                                    </div>
+                                    <div class="card-back">{{ card }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% elif game.game_type == 'dragdrop' %}
+                <div class="dragdrop-game text-center">
+                    <p class="mb-4 fs-5">{{ game_data.problem.question }}</p>
+                    <div class="code-template fs-3 font-monospace bg-dark text-light p-4 rounded mb-4" style="letter-spacing: 2px;">
+                        {{ game_data.problem.template }}
+                    </div>
+                    <p class="mb-3">Drag the correct answer:</p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap mb-4">
+                        {% for option in game_data.problem.options | shuffle %}
+                        <div class="drag-option btn btn-outline-primary btn-lg" draggable="true" data-value="{{ option }}">
+                            {{ option }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div id="drop-zone" class="border border-3 border-dashed rounded p-4 fs-4" style="min-height: 80px;">
+                        Drop your answer here
+                    </div>
+                    <button class="btn btn-success btn-lg mt-4" onclick="checkDragDrop()">
+                        <i data-feather="check" class="me-2"></i>Check Answer
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div id="game-complete" class="card mt-4" style="display: none; border-radius: 20px;">
+        <div class="card-body text-center p-5">
+            <div class="display-1 mb-3">🎉</div>
+            <h2 class="display-5 mb-3">Great Job!</h2>
+            <p class="lead mb-4" id="complete-message">You did amazing!</p>
+            <div class="d-flex justify-content-center gap-3 mb-4">
+                <div class="badge bg-info fs-4 p-3" id="coins-earned">+0 Coins</div>
+                <div class="badge bg-warning text-dark fs-4 p-3" id="stars-earned">+0 Stars</div>
+            </div>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('games') }}" class="btn btn-outline-secondary btn-lg">
+                    <i data-feather="arrow-left" class="me-2"></i>Back to Games
+                </a>
+                <a href="{{ url_for('play_game', game_id=game.id) }}" class="btn btn-primary btn-lg">
+                    <i data-feather="refresh-cw" class="me-2"></i>Play Again
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.match-card, .memory-card {
+    height: 120px;
+    cursor: pointer;
+    perspective: 1000px;
+}
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+.match-card.flipped .card-inner,
+.memory-card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    padding: 10px;
+    text-align: center;
+}
+.card-front {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 2rem;
+}
+.card-back {
+    background: white;
+    border: 2px solid #667eea;
+    transform: rotateY(180deg);
+}
+.match-card.matched .card-back {
+    background: #d4edda;
+    border-color: #28a745;
+}
+.memory-card.matched {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.drag-option {
+    min-width: 100px;
+    cursor: grab;
+}
+.drag-option:active {
+    cursor: grabbing;
+}
+#drop-zone.drag-over {
+    border-color: #28a745 !important;
+    background-color: #d4edda;
+}
+</style>
+
+<script>
+let startTime = Date.now();
+let moves = 0;
+let score = 0;
+let timerInterval;
+let flippedCards = [];
+let matchedPairs = 0;
+let totalPairs = {{ game_data.pairs | length if game.game_type == 'matching' else (game_data.cards | length if game.game_type == 'memory' else 0) }};
+
+timerInterval = setInterval(updateTimer, 1000);
+
+function updateTimer() {
+    let elapsed = Math.floor((Date.now() - startTime) / 1000);
+    let mins = Math.floor(elapsed / 60);
+    let secs = elapsed % 60;
+    document.getElementById('timer').textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+}
+
+function flipCard(card) {
+    if (card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) return;
+    
+    card.classList.add('flipped');
+    flippedCards.push(card);
+    moves++;
+    
+    if (flippedCards.length === 2) {
+        setTimeout(checkMatch, 1000);
+    }
+}
+
+function checkMatch() {
+    let [card1, card2] = flippedCards;
+    if (card1.dataset.pair === card2.dataset.pair && card1.dataset.type !== card2.dataset.type) {
+        card1.classList.add('matched');
+        card2.classList.add('matched');
+        matchedPairs++;
+        if (matchedPairs === totalPairs) {
+            score = Math.max(0, 100 - moves * 2);
+            completeGame();
+        }
+    } else {
+        card1.classList.remove('flipped');
+        card2.classList.remove('flipped');
+    }
+    flippedCards = [];
+}
+
+function flipMemoryCard(card) {
+    if (card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) return;
+    
+    card.classList.add('flipped');
+    flippedCards.push(card);
+    moves++;
+    
+    if (flippedCards.length === 2) {
+        setTimeout(checkMemoryMatch, 1000);
+    }
+}
+
+function checkMemoryMatch() {
+    let [card1, card2] = flippedCards;
+    if (card1.dataset.value === card2.dataset.value) {
+        card1.classList.add('matched');
+        card2.classList.add('matched');
+        matchedPairs++;
+        if (matchedPairs === totalPairs) {
+            score = Math.max(0, 100 - moves * 2);
+            completeGame();
+        }
+    } else {
+        card1.classList.remove('flipped');
+        card2.classList.remove('flipped');
+    }
+    flippedCards = [];
+}
+
+function checkSequence() {
+    moves++;
+    score = 100;
+    completeGame();
+}
+
+function checkDragDrop() {
+    let dropZone = document.getElementById('drop-zone');
+    let answer = dropZone.dataset.answer || '';
+    let correct = '{{ game_data.problem.answer if game.game_type == "dragdrop" else "" }}';
+    
+    moves++;
+    if (answer === correct) {
+        score = 100;
+        completeGame();
+    } else {
+        dropZone.classList.add('border-danger', 'bg-danger', 'bg-opacity-10');
+        dropZone.textContent = 'Try again!';
+        setTimeout(() => {
+            dropZone.classList.remove('border-danger', 'bg-danger', 'bg-opacity-10');
+            dropZone.textContent = 'Drop your answer here';
+            dropZone.dataset.answer = '';
+        }, 1500);
+    }
+}
+
+document.querySelectorAll('.drag-option').forEach(option => {
+    option.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text', e.target.dataset.value);
+    });
+});
+
+let dropZone = document.getElementById('drop-zone');
+if (dropZone) {
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        let value = e.dataTransfer.getData('text');
+        dropZone.textContent = value;
+        dropZone.dataset.answer = value;
+    });
+}
+
+function completeGame() {
+    clearInterval(timerInterval);
+    let timeSpent = Math.floor((Date.now() - startTime) / 1000);
+    
+    fetch('{{ url_for("complete_game", game_id=game.id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            score: score,
+            moves: moves,
+            time_spent: timeSpent,
+            difficulty: {{ difficulty }}
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('coins-earned').textContent = '+' + data.coins_earned + ' Coins';
+        document.getElementById('stars-earned').textContent = '+' + data.stars_earned + ' Stars';
+        document.getElementById('complete-message').textContent = data.message;
+        document.getElementById('game-complete').style.display = 'block';
+        document.getElementById('game-area').style.display = 'none';
+    });
+}
+
+feather.replace();
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Create Profile - NeuroAid Learning{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100 py-5">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="text-center mb-5">
+                    <a href="{{ url_for('index') }}" class="text-decoration-none">
+                        <div class="brand-logo mb-4">
+                            <svg width="64" height="64" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="40" cy="40" r="36" stroke="#4F46E5" stroke-width="4"/>
+                                <path d="M24 40L34 50L56 28" stroke="#4F46E5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h1 class="h2 fw-bold text-primary">Agentic</h1>
+                    </a>
+                </div>
+                
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <h2 class="h4 text-center mb-4">Create Your Profile</h2>
+                        <p class="text-center text-muted mb-4">
+                            Fill in your details to start your personalized learning journey
+                        </p>
+                        
+                        <form action="{{ url_for('register') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-4">
+                                <label for="name" class="form-label fw-semibold">Your Name</label>
+                                <input type="text" class="form-control form-control-lg" id="name" name="name" 
+                                       required placeholder="Enter your full name" maxlength="100"
+                                       aria-describedby="nameHelp">
+                                <div id="nameHelp" class="form-text">This is how we'll address you</div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="email" class="form-label fw-semibold">
+                                    Email Address <span class="text-muted">(Optional)</span>
+                                </label>
+                                <input type="email" class="form-control form-control-lg" id="email" name="email" 
+                                       placeholder="your.email@example.com" maxlength="120"
+                                       aria-describedby="emailHelp">
+                                <div id="emailHelp" class="form-text">For account recovery and notifications</div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold">
+                                    Password <span class="text-muted">(Optional)</span>
+                                </label>
+                                <input type="password" class="form-control form-control-lg" id="password" name="password" 
+                                       placeholder="Create a password"
+                                       aria-describedby="passwordHelp">
+                                <div id="passwordHelp" class="form-text">Optional - for extra security</div>
+                            </div>
+                            
+                            <div class="alert alert-info d-flex align-items-start gap-3" role="alert">
+                                <i data-feather="info" aria-hidden="true" class="flex-shrink-0 mt-1"></i>
+                                <div>
+                                    <strong>Accessibility First:</strong> After creating your profile, you can enable 
+                                    audio mode, sign language support, and other accessibility features in Settings.
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i data-feather="check-circle" aria-hidden="true"></i>
+                                <span>Create Profile</span>
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('index') }}" class="text-muted text-decoration-none">
+                                <i data-feather="arrow-left" aria-hidden="true"></i>
+                                <span>Back to Login</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Programming Basics{% endblock %}
+{% block lesson_heading %}Programming Basics{% endblock %}
+{% block lesson_description %}Learn the fundamentals of computer programming{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section">
+    {% if difficulty == 'beginner' %}
+    <h2>What is Programming?</h2>
+    <p class="lead">Programming is like giving instructions to a computer. Just like you follow a recipe to make a cake, a computer follows your instructions to do tasks!</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Think of a computer as a very fast helper that does exactly what you tell it to do.
+    </div>
+
+    <h3>Your First Code</h3>
+    <p>Here's a simple example that tells the computer to say "Hello":</p>
+    
+    <div class="code-example">
+        <pre>print("Hello, World!")</pre>
+    </div>
+    
+    <p>When you run this code, the computer will display: <strong>Hello, World!</strong></p>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Introduction to Programming</h2>
+    <p class="lead">Programming is the process of creating instructions that a computer can execute. These instructions are written in programming languages like Python, Java, or JavaScript.</p>
+    
+    <h3>Key Concepts</h3>
+    <ul>
+        <li><strong>Variables:</strong> Containers that store data</li>
+        <li><strong>Data Types:</strong> Different kinds of data (numbers, text, etc.)</li>
+        <li><strong>Operators:</strong> Symbols that perform operations</li>
+        <li><strong>Control Flow:</strong> Making decisions in code</li>
+    </ul>
+
+    <h3>Example: Variables and Output</h3>
+    <div class="code-example">
+        <pre>name = "Student"
+age = 20
+print(f"Hello, {name}! You are {age} years old.")</pre>
+    </div>
+
+    {% else %}
+    <h2>Programming Fundamentals</h2>
+    <p class="lead">Programming involves designing algorithms, implementing data structures, and understanding computational complexity to solve problems efficiently.</p>
+    
+    <h3>Core Programming Paradigms</h3>
+    <ul>
+        <li><strong>Imperative:</strong> Step-by-step instructions</li>
+        <li><strong>Declarative:</strong> Describing what to achieve</li>
+        <li><strong>Object-Oriented:</strong> Organizing code into objects</li>
+        <li><strong>Functional:</strong> Using pure functions</li>
+    </ul>
+
+    <h3>Example: Function with Error Handling</h3>
+    <div class="code-example">
+        <pre>def calculate_average(numbers: list) -> float:
+    """Calculate the average of a list of numbers."""
+    if not numbers:
+        raise ValueError("Cannot calculate average of empty list")
+    return sum(numbers) / len(numbers)
+
+try:
+    result = calculate_average([85, 90, 78, 92])
+    print(f"Average score: {result:.2f}")
+except ValueError as e:
+    print(f"Error: {e}")</pre>
+    </div>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Visual Diagram</h3>
+    <div class="diagram-placeholder">
+        <span><i data-feather="code"></i> Programming Flow Diagram</span>
+    </div>
+</div>
+{% endblock %}

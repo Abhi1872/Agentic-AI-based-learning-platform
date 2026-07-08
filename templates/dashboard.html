@@ -1,0 +1,592 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - NeuroAid Learning{% endblock %}
+
+{% block extra_css %}
+<style>
+.ai-toggle.active {
+    background-color: var(--bs-primary);
+    color: white;
+    border-color: var(--bs-primary);
+}
+.ai-toggle.active:hover {
+    background-color: var(--bs-primary);
+    opacity: 0.9;
+}
+.ai-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-6 fw-bold mb-2">{{ get_greeting(student.name) }}</h1>
+            <p class="lead text-muted">Let's continue your learning journey</p>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-lg-8">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap align-items-center gap-4">
+                        <div class="profile-avatar">
+                            <div class="avatar-circle bg-primary text-white">
+                                {{ student.name[0].upper() }}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h2 class="h4 mb-1">{{ student.name }}</h2>
+                            <p class="text-muted mb-2">Student ID: {{ student.student_id }}</p>
+                            <div class="d-flex flex-wrap gap-3">
+                                <span class="badge bg-{{ get_difficulty_color(student.current_difficulty) }} fs-6">
+                                    Level: {{ get_difficulty_label(student.current_difficulty) }}
+                                </span>
+                                {% if student.streak_days > 0 %}
+                                <span class="badge bg-warning text-dark fs-6">
+                                    <i data-feather="zap" aria-hidden="true" style="width: 14px; height: 14px;"></i>
+                                    {{ student.streak_days }} day streak
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end d-none d-md-block">
+                            <a href="{{ url_for('progress') }}" class="btn btn-outline-primary btn-lg">
+                                <i data-feather="bar-chart-2" aria-hidden="true"></i>
+                                View Progress
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm bg-primary text-white">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <h3 class="h5 mb-3">Quick Stats</h3>
+                    <div class="row g-3 text-center">
+                        <div class="col-4">
+                            <div class="stat-number display-6 fw-bold">{{ student.total_lessons_completed }}</div>
+                            <div class="stat-label small opacity-75">Lessons</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-number display-6 fw-bold">{{ student.total_quizzes_taken }}</div>
+                            <div class="stat-label small opacity-75">Quizzes</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-number display-6 fw-bold">{{ "%.0f"|format(student.average_score) }}%</div>
+                            <div class="stat-label small opacity-75">Avg Score</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if next_lesson %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: #1e3a5f;">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-8">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-circle p-3" style="background: rgba(255,255,255,0.2);">
+                                    <i data-feather="target" style="width: 32px; height: 32px; color: #ffffff;"></i>
+                                </div>
+                                <div>
+                                    <h3 class="h5 mb-1" style="color: #ffffff;">Next Recommended Lesson</h3>
+                                    <p class="mb-0" style="color: rgba(255,255,255,0.75);">Based on your learning progress</p>
+                                </div>
+                            </div>
+                            <h4 class="h3 fw-bold mb-2" style="color: #4fc3f7;">{{ next_lesson.title }}</h4>
+                            <p class="mb-0" style="color: #e0e0e0;">{{ next_lesson.description or 'Continue your learning journey with this lesson' }}</p>
+                        </div>
+                        <div class="col-12 col-md-4 text-md-end mt-3 mt-md-0">
+                            <a href="{{ url_for('lesson', lesson_id=next_lesson.id) }}" class="btn btn-light btn-lg">
+                                <i data-feather="play" class="me-2"></i>
+                                Start Lesson
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-md-6 col-lg-3">
+            <a href="{{ url_for('games') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm bg-success text-white quick-action-card">
+                    <div class="card-body p-4 text-center">
+                        <i data-feather="play-circle" class="mb-3" style="width: 48px; height: 48px;"></i>
+                        <h3 class="h5 mb-2">Learning Games</h3>
+                        <p class="mb-0 opacity-75">Fun games to practice coding!</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <a href="{{ url_for('attendance') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm bg-info text-white quick-action-card">
+                    <div class="card-body p-4 text-center">
+                        <i data-feather="calendar" class="mb-3" style="width: 48px; height: 48px;"></i>
+                        <h3 class="h5 mb-2">Attendance</h3>
+                        <p class="mb-0 opacity-75">Mark your daily attendance</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <a href="{{ url_for('sign_language_page') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm bg-purple text-white quick-action-card" style="background: #9b59b6;">
+                    <div class="card-body p-4 text-center">
+                        <i data-feather="hand" class="mb-3" style="width: 48px; height: 48px;"></i>
+                        <h3 class="h5 mb-2">Sign Language</h3>
+                        <p class="mb-0 opacity-75">Use gestures to interact</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <a href="{{ url_for('help_page') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm bg-secondary text-white quick-action-card">
+                    <div class="card-body p-4 text-center">
+                        <i data-feather="help-circle" class="mb-3" style="width: 48px; height: 48px;"></i>
+                        <h3 class="h5 mb-2">Help & Support</h3>
+                        <p class="mb-0 opacity-75">Accessibility options</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-md-6 col-lg-3">
+            <a href="{{ url_for('progress') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm bg-warning text-dark quick-action-card">
+                    <div class="card-body p-4 text-center">
+                        <i data-feather="trending-up" class="mb-3" style="width: 48px; height: 48px;"></i>
+                        <h3 class="h5 mb-2">My Progress</h3>
+                        <p class="mb-0 opacity-75">View your learning journey</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- AI Agent Controls -->
+    <div class="row g-3 mb-5">
+        <div class="col-12">
+            <h3 class="h5 mb-3">
+                <i data-feather="cpu" aria-hidden="true"></i>
+                AI Learning Assistant
+            </h3>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="ai-icon bg-primary bg-opacity-10 rounded-circle p-2">
+                            <i data-feather="zap" class="text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="h6 mb-0">AI Mode</h4>
+                            <small class="text-muted">Adaptive learning</small>
+                        </div>
+                    </div>
+                    <button id="ai-mode-toggle" class="btn btn-sm btn-outline-primary ai-toggle active" onclick="toggleAIMode()">
+                        <span class="status-text">ON</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="ai-icon bg-info bg-opacity-10 rounded-circle p-2">
+                            <i data-feather="eye" class="text-info"></i>
+                        </div>
+                        <div>
+                            <h4 class="h6 mb-0">Accessibility</h4>
+                            <small class="text-muted">Auto-adjust settings</small>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('settings') }}" class="btn btn-sm btn-outline-info">
+                        Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="ai-icon bg-warning bg-opacity-10 rounded-circle p-2">
+                            <i data-feather="smile" class="text-warning"></i>
+                        </div>
+                        <div>
+                            <h4 class="h6 mb-0">Emotion Monitor</h4>
+                            <small class="text-muted">Webcam detection</small>
+                        </div>
+                    </div>
+                    <button id="emotion-monitor-toggle" class="btn btn-sm btn-outline-warning ai-toggle" onclick="toggleEmotionMonitor()">
+                        <span class="status-text">OFF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Accessibility Toggles -->
+    <div class="row g-3 mb-5">
+        <div class="col-12">
+            <h3 class="h5 mb-3">
+                <i data-feather="settings" aria-hidden="true"></i>
+                Quick Accessibility
+            </h3>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i data-feather="moon" class="text-dark"></i>
+                        <span class="small">High Contrast</span>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="dashboard-high-contrast" onchange="dashboardToggleHighContrast()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i data-feather="type" class="text-dark"></i>
+                        <span class="small">Large Text</span>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="dashboard-large-text" onchange="dashboardToggleLargeText()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i data-feather="pause-circle" class="text-dark"></i>
+                        <span class="small">Reduced Motion</span>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="dashboard-reduced-motion" onchange="dashboardToggleReducedMotion()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i data-feather="volume-2" class="text-dark"></i>
+                        <span class="small">Audio Mode</span>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="dashboard-audio-mode" onchange="dashboardToggleAudioMode()">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="accessibility-recommendations"></div>
+
+    {% if recommendations %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="h5 mb-3">
+                <i data-feather="star" aria-hidden="true"></i>
+                Recommendations for You
+            </h3>
+            <div class="row g-3">
+                {% for rec in recommendations[:3] %}
+                <div class="col-12 col-md-4">
+                    <div class="card border-0 shadow-sm h-100 recommendation-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="rec-icon bg-light rounded-circle p-3">
+                                    <i data-feather="{{ rec.icon }}" aria-hidden="true"></i>
+                                </div>
+                                <div>
+                                    <h4 class="h6 mb-1">{{ rec.title }}</h4>
+                                    <p class="text-muted small mb-0">{{ rec.message }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h4 mb-0">
+                    <i data-feather="book-open" aria-hidden="true"></i>
+                    Your Lessons
+                </h3>
+                <div class="progress-summary">
+                    <span class="text-muted">
+                        {{ progress_stats.completed }} of {{ lessons|length }} completed
+                    </span>
+                    <div class="progress ms-3" style="width: 120px; height: 8px;" role="progressbar"
+                         aria-valuenow="{{ progress_stats.completion_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar {{ get_progress_bar_class(progress_stats.completion_percentage) }}" 
+                             style="width: {{ progress_stats.completion_percentage }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for lesson in lessons %}
+        {% set lp = progress_map.get(lesson.id) %}
+        {% set status = lp.status if lp else 'not_started' %}
+        {% set progress_percent = lp.progress_percent if lp else 0 %}
+        
+        <div class="col-12 col-md-6 col-xl-4">
+            <a href="{{ url_for('lesson', lesson_id=lesson.id) }}" class="text-decoration-none">
+                <div class="card lesson-card h-100 border-0 shadow-sm difficulty-{{ student.current_difficulty }}">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-{{ get_difficulty_color(student.current_difficulty) }}">
+                                {{ get_difficulty_label(student.current_difficulty) }}
+                            </span>
+                            {% if status == 'completed' %}
+                            <span class="badge bg-success">
+                                <i data-feather="check" aria-hidden="true" style="width: 12px; height: 12px;"></i>
+                                Completed
+                            </span>
+                            {% elif status == 'in_progress' %}
+                            <span class="badge bg-info">In Progress</span>
+                            {% endif %}
+                        </div>
+                        
+                        <h4 class="h5 card-title mb-2">{{ lesson.title }}</h4>
+                        <p class="card-text text-muted small mb-3">{{ lesson.description or 'Start learning this topic' }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small">
+                                <i data-feather="clock" aria-hidden="true" style="width: 14px; height: 14px;"></i>
+                                {{ lesson.estimated_time }} min
+                            </span>
+                            <span class="text-muted small">{{ lesson.subject }}</span>
+                        </div>
+                        
+                        <div class="progress" style="height: 6px;" role="progressbar"
+                             aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100"
+                             aria-label="Lesson progress">
+                            <div class="progress-bar {{ get_progress_bar_class(progress_percent) }}" 
+                                 style="width: {{ progress_percent }}%"></div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                        <span class="btn btn-outline-primary w-100">
+                            {% if status == 'completed' %}
+                                Review Lesson
+                            {% elif status == 'in_progress' %}
+                                Continue Learning
+                            {% else %}
+                                Start Lesson
+                            {% endif %}
+                            <i data-feather="arrow-right" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <i data-feather="book" class="text-muted mb-3" style="width: 48px; height: 48px;" aria-hidden="true"></i>
+                    <h4 class="h5">No Lessons Available</h4>
+                    <p class="text-muted">New lessons will appear here when they're added.</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+<script src="{{ url_for('static', filename='js/emotion_agent.js') }}"></script>
+<script>
+async function toggleAIMode() {
+    const btn = document.getElementById('ai-mode-toggle');
+    const isActive = btn.classList.contains('active');
+    const newState = !isActive;
+    
+    try {
+        const response = await fetch('/api/ai/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ enabled: newState })
+        });
+        
+        if (response.ok) {
+            btn.classList.toggle('active', newState);
+            btn.querySelector('.status-text').textContent = newState ? 'ON' : 'OFF';
+        }
+    } catch (error) {
+        console.error('Failed to toggle AI mode:', error);
+    }
+}
+
+async function toggleEmotionMonitor() {
+    const btn = document.getElementById('emotion-monitor-toggle');
+    const isActive = btn.classList.contains('active');
+    const newState = !isActive;
+    
+    if (newState) {
+        const success = await window.emotionAgent.startDetection();
+        if (success) {
+            btn.classList.add('active');
+            btn.querySelector('.status-text').textContent = 'ON';
+            
+            fetch('/api/emotion/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ enabled: true })
+            });
+        }
+    } else {
+        window.emotionAgent.stopDetection();
+        btn.classList.remove('active');
+        btn.querySelector('.status-text').textContent = 'OFF';
+        
+        fetch('/api/emotion/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ enabled: false })
+        });
+    }
+}
+
+async function dashboardToggleHighContrast() {
+    const isEnabled = document.getElementById('dashboard-high-contrast').checked;
+    document.body.classList.toggle('high-contrast', isEnabled);
+    await updateAccessibilitySetting('high_contrast', isEnabled);
+}
+
+async function dashboardToggleLargeText() {
+    const isEnabled = document.getElementById('dashboard-large-text').checked;
+    document.body.classList.toggle('large-text', isEnabled);
+    await updateAccessibilitySetting('large_text', isEnabled);
+}
+
+async function dashboardToggleReducedMotion() {
+    const isEnabled = document.getElementById('dashboard-reduced-motion').checked;
+    document.body.classList.toggle('reduced-motion', isEnabled);
+    await updateAccessibilitySetting('reduced_motion', isEnabled);
+}
+
+async function dashboardToggleAudioMode() {
+    const isEnabled = document.getElementById('dashboard-audio-mode').checked;
+    document.body.classList.toggle('audio-mode', isEnabled);
+    await updateAccessibilitySetting('audio_mode', isEnabled);
+}
+
+async function updateAccessibilitySetting(setting, value) {
+    try {
+        await fetch('/api/accessibility/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ [setting]: value })
+        });
+    } catch (error) {
+        console.error('Failed to update accessibility setting:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/api/ai/preferences');
+        if (response.ok) {
+            const data = await response.json();
+            
+            const aiBtn = document.getElementById('ai-mode-toggle');
+            if (aiBtn && data.ai_mode_enabled) {
+                aiBtn.classList.add('active');
+                aiBtn.querySelector('.status-text').textContent = 'ON';
+            } else if (aiBtn) {
+                aiBtn.classList.remove('active');
+                aiBtn.querySelector('.status-text').textContent = 'OFF';
+            }
+            
+            const emotionBtn = document.getElementById('emotion-monitor-toggle');
+            if (emotionBtn && data.emotion_monitor_enabled) {
+                emotionBtn.classList.add('active');
+                emotionBtn.querySelector('.status-text').textContent = 'ON';
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load AI preferences:', error);
+    }
+    
+    try {
+        const accessResponse = await fetch('/api/accessibility/settings');
+        if (accessResponse.ok) {
+            const accessData = await accessResponse.json();
+            if (accessData.success && accessData.settings) {
+                const s = accessData.settings;
+                const hc = document.getElementById('dashboard-high-contrast');
+                const lt = document.getElementById('dashboard-large-text');
+                const rm = document.getElementById('dashboard-reduced-motion');
+                const am = document.getElementById('dashboard-audio-mode');
+                
+                if (hc) hc.checked = s.high_contrast || false;
+                if (lt) lt.checked = s.large_text || false;
+                if (rm) rm.checked = s.reduced_motion || false;
+                if (am) am.checked = s.audio_mode || false;
+                
+                if (s.high_contrast) document.body.classList.add('high-contrast');
+                if (s.large_text) document.body.classList.add('large-text');
+                if (s.reduced_motion) document.body.classList.add('reduced-motion');
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load accessibility settings:', error);
+    }
+});
+</script>
+{% endblock %}

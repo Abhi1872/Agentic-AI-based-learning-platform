@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - NeuroAid Learning{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">
+                <i data-feather="settings" aria-hidden="true"></i>
+                Accessibility Settings
+            </h1>
+            <p class="text-muted">Customize your learning experience</p>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <form action="{{ url_for('update_settings') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0 p-4 pb-0">
+                        <h2 class="h5 mb-0">
+                            <i data-feather="eye" aria-hidden="true"></i>
+                            Visual Settings
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <label for="font_size" class="form-label fw-semibold">Font Size</label>
+                            <select class="form-select form-select-lg" id="font_size" name="font_size">
+                                <option value="14" {% if student.font_size == 14 %}selected{% endif %}>Small (14px)</option>
+                                <option value="16" {% if student.font_size == 16 %}selected{% endif %}>Medium (16px)</option>
+                                <option value="18" {% if student.font_size == 18 or not student.font_size %}selected{% endif %}>Large (18px) - Recommended</option>
+                                <option value="20" {% if student.font_size == 20 %}selected{% endif %}>Extra Large (20px)</option>
+                                <option value="24" {% if student.font_size == 24 %}selected{% endif %}>Maximum (24px)</option>
+                            </select>
+                            <div class="form-text">Adjust text size throughout the platform</div>
+                        </div>
+                        
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" 
+                                   id="high_contrast" name="high_contrast"
+                                   {% if student.high_contrast %}checked{% endif %}>
+                            <label class="form-check-label fw-semibold" for="high_contrast">
+                                High Contrast Mode
+                            </label>
+                            <div class="form-text">Increase color contrast for better visibility</div>
+                        </div>
+                        
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" 
+                                   id="reduce_motion" name="reduce_motion"
+                                   {% if student.reduce_motion %}checked{% endif %}>
+                            <label class="form-check-label fw-semibold" for="reduce_motion">
+                                Reduce Motion
+                            </label>
+                            <div class="form-text">Minimize animations and transitions</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0 p-4 pb-0">
+                        <h2 class="h5 mb-0">
+                            <i data-feather="volume-2" aria-hidden="true"></i>
+                            Audio Settings
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" 
+                                   id="audio_enabled" name="audio_enabled"
+                                   {% if student.audio_enabled %}checked{% endif %}>
+                            <label class="form-check-label fw-semibold" for="audio_enabled">
+                                Text-to-Speech (Audio Mode)
+                            </label>
+                            <div class="form-text">Enable audio playback for lesson content</div>
+                        </div>
+                        
+                        <div class="alert alert-info d-flex align-items-start gap-3 mb-0" role="alert">
+                            <i data-feather="info" aria-hidden="true" class="flex-shrink-0 mt-1"></i>
+                            <div>
+                                <strong>Audio Features:</strong> When enabled, lessons will have a "Listen" button 
+                                that reads the content aloud. Great for visually impaired users or auditory learners.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0 p-4 pb-0">
+                        <h2 class="h5 mb-0">
+                            <i data-feather="hand" aria-hidden="true"></i>
+                            Sign Language Settings
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" 
+                                   id="sign_language_enabled" name="sign_language_enabled"
+                                   {% if student.sign_language_enabled %}checked{% endif %}>
+                            <label class="form-check-label fw-semibold" for="sign_language_enabled">
+                                Sign Language Mode
+                            </label>
+                            <div class="form-text">Enable sign language interpretation features</div>
+                        </div>
+                        
+                        <div class="alert alert-warning d-flex align-items-start gap-3 mb-0" role="alert">
+                            <i data-feather="alert-triangle" aria-hidden="true" class="flex-shrink-0 mt-1"></i>
+                            <div>
+                                <strong>Coming Soon:</strong> Full sign language video interpretation is being developed. 
+                                Currently, gesture controls for navigation are available.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0 p-4 pb-0">
+                        <h2 class="h5 mb-0">
+                            <i data-feather="smile" aria-hidden="true"></i>
+                            Emotion Detection
+                        </h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" 
+                                   id="emotion_detection_enabled" name="emotion_detection_enabled"
+                                   {% if student.emotion_detection_enabled %}checked{% endif %}>
+                            <label class="form-check-label fw-semibold" for="emotion_detection_enabled">
+                                Enable Emotion Detection
+                            </label>
+                            <div class="form-text">Use webcam to adapt content based on your emotional state</div>
+                        </div>
+                        
+                        <div class="alert alert-info d-flex align-items-start gap-3 mb-0" role="alert">
+                            <i data-feather="shield" aria-hidden="true" class="flex-shrink-0 mt-1"></i>
+                            <div>
+                                <strong>Privacy Note:</strong> Emotion detection is processed locally in your browser. 
+                                No video is recorded or stored. You can disable this feature at any time.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex flex-wrap justify-content-between gap-3">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                        <i data-feather="arrow-left" aria-hidden="true"></i>
+                        Back to Dashboard
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i data-feather="save" aria-hidden="true"></i>
+                        Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

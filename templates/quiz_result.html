@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Results - NeuroAid Learning{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9 col-xl-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-5 text-center">
+                    {% if score >= 80 %}
+                    <div class="result-icon mb-4 text-success">
+                        <i data-feather="award" style="width: 80px; height: 80px;" aria-hidden="true"></i>
+                    </div>
+                    <h1 class="display-4 fw-bold text-success mb-2">Excellent!</h1>
+                    {% elif score >= 60 %}
+                    <div class="result-icon mb-4 text-primary">
+                        <i data-feather="check-circle" style="width: 80px; height: 80px;" aria-hidden="true"></i>
+                    </div>
+                    <h1 class="display-4 fw-bold text-primary mb-2">Good Job!</h1>
+                    {% else %}
+                    <div class="result-icon mb-4 text-warning">
+                        <i data-feather="refresh-cw" style="width: 80px; height: 80px;" aria-hidden="true"></i>
+                    </div>
+                    <h1 class="display-4 fw-bold text-warning mb-2">Keep Practicing!</h1>
+                    {% endif %}
+                    
+                    <p class="lead text-muted mb-4">{{ message }}</p>
+                    
+                    <div class="score-display mb-4">
+                        <div class="display-1 fw-bold 
+                            {% if score >= 80 %}text-success{% elif score >= 60 %}text-primary{% else %}text-warning{% endif %}">
+                            {{ "%.0f"|format(score) }}%
+                        </div>
+                        <p class="text-muted">{{ correct_count }} out of {{ total }} correct</p>
+                    </div>
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-4">
+                            <div class="stat-box p-3 bg-light rounded-3">
+                                <div class="h4 mb-1">{{ correct_count }}</div>
+                                <div class="small text-muted">Correct</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box p-3 bg-light rounded-3">
+                                <div class="h4 mb-1">{{ total - correct_count }}</div>
+                                <div class="small text-muted">Incorrect</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box p-3 bg-light rounded-3">
+                                <div class="h4 mb-1">{{ format_time_spent(time_spent) }}</div>
+                                <div class="small text-muted">Time</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if difficulty_changed %}
+                    <div class="alert alert-info d-flex align-items-center gap-3" role="alert">
+                        <i data-feather="trending-up" aria-hidden="true"></i>
+                        <div class="text-start">
+                            <strong>Difficulty Adjusted!</strong><br>
+                            Based on your performance, your difficulty level has been 
+                            {% if new_difficulty == 'advanced' %}increased{% elif new_difficulty == 'easy' %}adjusted{% else %}updated{% endif %} 
+                            to <strong>{{ new_difficulty | capitalize }}</strong>.
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-transparent p-4 border-0">
+                    <h2 class="h5 mb-0">
+                        <i data-feather="list" aria-hidden="true"></i>
+                        Review Your Answers
+                    </h2>
+                </div>
+                <div class="card-body p-0">
+                    {% for question in questions %}
+                    {% set user_answer = answers.get(question.id) %}
+                    {% set is_correct = user_answer and user_answer.upper() == question.correct_answer.upper() %}
+                    
+                    <div class="review-question p-4 {% if not loop.first %}border-top{% endif %}">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <span class="badge fs-6 {% if is_correct %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if is_correct %}
+                                <i data-feather="check" aria-hidden="true" style="width: 14px; height: 14px;"></i>
+                                {% else %}
+                                <i data-feather="x" aria-hidden="true" style="width: 14px; height: 14px;"></i>
+                                {% endif %}
+                            </span>
+                            <div class="flex-grow-1">
+                                <p class="fw-semibold mb-2">{{ loop.index }}. {{ question.question_text }}</p>
+                                
+                                <div class="answer-options small">
+                                    {% set options = [('A', question.option_a), ('B', question.option_b), ('C', question.option_c), ('D', question.option_d)] %}
+                                    {% for letter, text in options %}
+                                    <div class="mb-1 p-2 rounded 
+                                        {% if letter == question.correct_answer %}bg-success bg-opacity-10 text-success fw-semibold{% endif %}
+                                        {% if letter == user_answer and letter != question.correct_answer %}bg-danger bg-opacity-10 text-danger{% endif %}">
+                                        <span class="me-2">{{ letter }}.</span>
+                                        {{ text }}
+                                        {% if letter == question.correct_answer %}
+                                        <span class="badge bg-success ms-2">Correct Answer</span>
+                                        {% endif %}
+                                        {% if letter == user_answer and letter != question.correct_answer %}
+                                        <span class="badge bg-danger ms-2">Your Answer</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                {% if question.explanation and not is_correct %}
+                                <div class="alert alert-info mt-3 mb-0 small" role="alert">
+                                    <strong>Explanation:</strong> {{ question.explanation }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="{{ url_for('lesson', lesson_id=quiz.lesson_id) }}" class="btn btn-outline-primary btn-lg">
+                    <i data-feather="book" aria-hidden="true"></i>
+                    Review Lesson
+                </a>
+                <a href="{{ url_for('take_quiz', quiz_id=quiz.id) }}" class="btn btn-outline-secondary btn-lg">
+                    <i data-feather="refresh-cw" aria-hidden="true"></i>
+                    Try Again
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                    <i data-feather="home" aria-hidden="true"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

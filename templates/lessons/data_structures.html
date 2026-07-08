@@ -1,0 +1,89 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Data Structures{% endblock %}
+{% block lesson_heading %}Data Structures{% endblock %}
+{% block lesson_description %}Learn how to organize and store data efficiently{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section">
+    {% if difficulty == 'beginner' %}
+    <h2>What are Data Structures?</h2>
+    <p class="lead">Data structures are ways to organize information on a computer, like different types of containers for storing things!</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Think of a data structure like a backpack with different pockets - each pocket helps you find things quickly!
+    </div>
+
+    <h3>Lists - Like a Shopping List</h3>
+    <p>A list keeps items in order, one after another:</p>
+    
+    <div class="code-example">
+        <pre>fruits = ["apple", "banana", "orange"]
+print(fruits[0])  # Shows: apple</pre>
+    </div>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Introduction to Data Structures</h2>
+    <p class="lead">Data structures are specialized formats for organizing, processing, and storing data. The choice of data structure affects the efficiency of your programs.</p>
+    
+    <h3>Common Data Structures</h3>
+    <ul>
+        <li><strong>Arrays/Lists:</strong> Sequential collection of elements</li>
+        <li><strong>Dictionaries/Maps:</strong> Key-value pairs</li>
+        <li><strong>Sets:</strong> Unique elements only</li>
+        <li><strong>Stacks:</strong> Last-In-First-Out (LIFO)</li>
+        <li><strong>Queues:</strong> First-In-First-Out (FIFO)</li>
+    </ul>
+
+    <h3>Example: Using Dictionaries</h3>
+    <div class="code-example">
+        <pre>student = {
+    "name": "Alice",
+    "age": 20,
+    "grades": [85, 90, 78]
+}
+print(f"{student['name']} is {student['age']} years old")</pre>
+    </div>
+
+    {% else %}
+    <h2>Advanced Data Structures</h2>
+    <p class="lead">Understanding time and space complexity of data structures is crucial for writing efficient algorithms and optimizing system performance.</p>
+    
+    <h3>Data Structure Complexity Analysis</h3>
+    <table class="table table-bordered">
+        <thead><tr><th>Structure</th><th>Access</th><th>Search</th><th>Insert</th><th>Delete</th></tr></thead>
+        <tbody>
+            <tr><td>Array</td><td>O(1)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
+            <tr><td>Hash Table</td><td>N/A</td><td>O(1)</td><td>O(1)</td><td>O(1)</td></tr>
+            <tr><td>Binary Tree</td><td>O(log n)</td><td>O(log n)</td><td>O(log n)</td><td>O(log n)</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Example: Implementing a Stack</h3>
+    <div class="code-example">
+        <pre>class Stack:
+    def __init__(self):
+        self._items = []
+    
+    def push(self, item):
+        self._items.append(item)
+    
+    def pop(self):
+        if not self.is_empty():
+            return self._items.pop()
+        raise IndexError("Stack is empty")
+    
+    def is_empty(self):
+        return len(self._items) == 0</pre>
+    </div>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Visual Diagram</h3>
+    <div class="diagram-placeholder">
+        <span><i data-feather="database"></i> Data Structures Visualization</span>
+    </div>
+</div>
+{% endblock %}

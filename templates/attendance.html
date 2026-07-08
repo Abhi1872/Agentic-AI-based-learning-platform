@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance - Agentic{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="h2 mb-4">
+                <i data-feather="calendar" class="me-2"></i>My Attendance
+            </h1>
+
+            <div class="card mb-4" style="border-radius: 20px;">
+                <div class="card-body text-center p-5">
+                    <h2 class="h4 mb-4">Today: {{ today.strftime('%A, %B %d, %Y') }}</h2>
+                    
+                    {% if today_record %}
+                    <div class="display-1 text-success mb-3">
+                        <i data-feather="check-circle" style="width: 80px; height: 80px;"></i>
+                    </div>
+                    <h3 class="text-success mb-2">You're Present!</h3>
+                    <p class="text-muted">Checked in at {{ today_record.check_in_time.strftime('%I:%M %p') if today_record.check_in_time else 'Today' }}</p>
+                    {% else %}
+                    <div class="display-1 text-warning mb-3">
+                        <i data-feather="clock" style="width: 80px; height: 80px;"></i>
+                    </div>
+                    <h3 class="mb-4">Mark Your Attendance</h3>
+                    <form action="{{ url_for('mark_attendance') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-success btn-lg" style="min-width: 200px; min-height: 80px; font-size: 1.5rem;">
+                            <i data-feather="check" class="me-2"></i>I'm Here!
+                        </button>
+                    </form>
+                    <button class="btn btn-outline-primary btn-lg mt-3" onclick="voiceAttendance()" style="min-height: 60px;">
+                        <i data-feather="mic" class="me-2"></i>Say "I'm Here"
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card" style="border-radius: 15px;">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="h5 mb-0">
+                                <i data-feather="calendar" class="me-2"></i>This Week
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fs-5">Present Days:</span>
+                                <span class="badge bg-success fs-5 p-2">{{ weekly_present }} / {{ weekly_total }}</span>
+                            </div>
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar bg-success" style="width: {{ (weekly_present / max(weekly_total, 1) * 100) | int }}%;">
+                                    {{ (weekly_present / max(weekly_total, 1) * 100) | int }}%
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                {% for record in week_records %}
+                                <span class="badge {{ 'bg-success' if record.status == 'present' else 'bg-secondary' }} me-1 p-2">
+                                    {{ record.date.strftime('%a') }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card" style="border-radius: 15px;">
+                        <div class="card-header bg-info text-white">
+                            <h3 class="h5 mb-0">
+                                <i data-feather="calendar" class="me-2"></i>This Month
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fs-5">Present Days:</span>
+                                <span class="badge bg-success fs-5 p-2">{{ monthly_present }} / {{ monthly_total }}</span>
+                            </div>
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar bg-info" style="width: {{ (monthly_present / max(monthly_total, 1) * 100) | int }}%;">
+                                    {{ (monthly_present / max(monthly_total, 1) * 100) | int }}%
+                                </div>
+                            </div>
+                            {% if monthly_present >= 20 %}
+                            <div class="alert alert-success mt-3 mb-0">
+                                <i data-feather="award" class="me-2"></i>Excellent attendance this month!
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="voice-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px;">
+            <div class="modal-body text-center p-5">
+                <div class="display-1 text-primary mb-3" id="voice-icon">
+                    <i data-feather="mic" style="width: 80px; height: 80px;"></i>
+                </div>
+                <h3 id="voice-status">Listening...</h3>
+                <p class="text-muted" id="voice-message">Say "I'm here" or "Present"</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function voiceAttendance() {
+    let modal = new bootstrap.Modal(document.getElementById('voice-modal'));
+    modal.show();
+    
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.continuous = false;
+        
+        recognition.onresult = function(event) {
+            let transcript = event.results[0][0].transcript.toLowerCase();
+            if (transcript.includes('here') || transcript.includes('present') || transcript.includes('yes')) {
+                document.getElementById('voice-status').textContent = 'Got it!';
+                document.getElementById('voice-message').textContent = 'Marking attendance...';
+                
+                fetch('{{ url_for("voice_attendance") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({confirmed: true})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        document.getElementById('voice-message').textContent = data.message;
+                    }
+                });
+            } else {
+                document.getElementById('voice-status').textContent = 'Try again';
+                document.getElementById('voice-message').textContent = 'Say "I\'m here" or "Present"';
+            }
+        };
+        
+        recognition.onerror = function() {
+            document.getElementById('voice-status').textContent = 'Could not hear you';
+            document.getElementById('voice-message').textContent = 'Please try the button instead';
+        };
+        
+        recognition.start();
+    } else {
+        document.getElementById('voice-status').textContent = 'Voice not supported';
+        document.getElementById('voice-message').textContent = 'Please use the button instead';
+    }
+}
+</script>
+{% endblock %}

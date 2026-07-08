@@ -1,0 +1,176 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Compiler Design{% endblock %}
+{% block lesson_heading %}Compiler Design{% endblock %}
+{% block lesson_description %}Understand how programming languages are translated into machine code{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section" id="lesson-audio-content">
+    {% if difficulty == 'beginner' %}
+    <h2>What is a Compiler?</h2>
+    <p class="lead">A compiler is a program that translates code written in one programming language into another language, usually machine code that computers can execute.</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Think of a compiler as a translator that converts your Python or C code into the language the computer's processor understands.
+    </div>
+
+    <h3>Compiler vs Interpreter</h3>
+    <ul>
+        <li><strong>Compiler:</strong> Translates the entire program at once, creates an executable file</li>
+        <li><strong>Interpreter:</strong> Translates and runs code line by line</li>
+    </ul>
+
+    <h3>Stages of Compilation</h3>
+    <ol>
+        <li><strong>Reading:</strong> The compiler reads your source code</li>
+        <li><strong>Checking:</strong> It checks for errors in your code</li>
+        <li><strong>Translating:</strong> It converts to machine language</li>
+        <li><strong>Creating:</strong> It produces an executable program</li>
+    </ol>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Compiler Architecture</h2>
+    <p class="lead">Understanding the phases of a compiler and how source code is transformed into executable code.</p>
+    
+    <h3>Compiler Phases</h3>
+    <div class="code-example">
+        <pre>Source Code
+    │
+    ▼
+┌──────────────────┐
+│ Lexical Analysis │ → Tokens
+└──────────────────┘
+    │
+    ▼
+┌──────────────────┐
+│ Syntax Analysis  │ → Parse Tree/AST
+└──────────────────┘
+    │
+    ▼
+┌──────────────────┐
+│ Semantic Analysis│ → Annotated AST
+└──────────────────┘
+    │
+    ▼
+┌──────────────────┐
+│ IR Generation    │ → Intermediate Code
+└──────────────────┘
+    │
+    ▼
+┌──────────────────┐
+│ Optimization     │ → Optimized IR
+└──────────────────┘
+    │
+    ▼
+┌──────────────────┐
+│ Code Generation  │ → Machine Code
+└──────────────────┘</pre>
+    </div>
+
+    <h3>Lexical Analysis (Scanner)</h3>
+    <div class="code-example">
+        <pre>Input: "int x = 5 + 3;"
+
+Output Tokens:
+├── KEYWORD: int
+├── IDENTIFIER: x
+├── OPERATOR: =
+├── NUMBER: 5
+├── OPERATOR: +
+├── NUMBER: 3
+└── SEMICOLON: ;</pre>
+    </div>
+
+    <h3>Syntax Analysis (Parser)</h3>
+    <p>Creates an Abstract Syntax Tree (AST) using grammar rules:</p>
+    <div class="code-example">
+        <pre>Grammar (BNF):
+expr   → term (('+' | '-') term)*
+term   → factor (('*' | '/') factor)*
+factor → NUMBER | IDENTIFIER | '(' expr ')'</pre>
+    </div>
+
+    {% else %}
+    <h2>Advanced Compiler Design</h2>
+    <p class="lead">Deep dive into optimization techniques, code generation, and advanced parsing.</p>
+    
+    <h3>Parser Types</h3>
+    <ul>
+        <li><strong>Top-Down (LL):</strong> Recursive descent, LL(k) parsers</li>
+        <li><strong>Bottom-Up (LR):</strong> SLR, LALR, CLR parsers</li>
+    </ul>
+
+    <h3>Intermediate Representations</h3>
+    <div class="code-example">
+        <pre># Three-Address Code (TAC)
+# Source: a = b * c + d * e
+
+t1 = b * c
+t2 = d * e
+t3 = t1 + t2
+a = t3
+
+# Static Single Assignment (SSA)
+t1₁ = b₀ * c₀
+t2₁ = d₀ * e₀
+t3₁ = t1₁ + t2₁
+a₁ = t3₁</pre>
+    </div>
+
+    <h3>Optimization Techniques</h3>
+    <div class="code-example">
+        <pre>1. Constant Folding:
+   x = 3 + 5  →  x = 8
+
+2. Dead Code Elimination:
+   x = 5
+   x = 10    ← Remove first assignment
+   print(x)
+
+3. Loop Invariant Code Motion:
+   for i in range(n):
+       x = a + b        ← Move outside loop
+       arr[i] = x * i
+
+   x = a + b
+   for i in range(n):
+       arr[i] = x * i
+
+4. Common Subexpression Elimination:
+   a = b + c
+   d = b + c  →  d = a</pre>
+    </div>
+
+    <h3>Register Allocation</h3>
+    <p>Graph coloring algorithm for register assignment:</p>
+    <ul>
+        <li>Build interference graph (variables as nodes)</li>
+        <li>Simplify: remove nodes with degree < k</li>
+        <li>Spill: if stuck, spill a variable to memory</li>
+        <li>Select: assign colors (registers) to nodes</li>
+    </ul>
+
+    <h3>Code Generation</h3>
+    <div class="code-example">
+        <pre># TAC to x86-64 Assembly
+# t1 = a + b
+
+mov  rax, [a]      ; Load a into rax
+add  rax, [b]      ; Add b to rax
+mov  [t1], rax     ; Store result in t1</pre>
+    </div>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Key Takeaways</h3>
+    <div class="alert alert-success">
+        <ul class="mb-0">
+            <li>Compilers bridge the gap between human-readable code and machine execution</li>
+            <li>Multiple phases transform source code systematically</li>
+            <li>Optimization is crucial for generating efficient code</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

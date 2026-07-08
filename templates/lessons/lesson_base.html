@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/accessibility.css') }}">
+<style>
+.lesson-content-section {
+    background: var(--bs-light);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+.code-example {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border-radius: 8px;
+    padding: 1.5rem;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+.diagram-placeholder {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+.difficulty-indicator {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 100;
+}
+.speak-btn {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    z-index: 100;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+}
+.audio-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% block lesson_title %}Lesson{% endblock %}</li>
+        </ol>
+    </nav>
+
+    <div class="difficulty-indicator">
+        <span class="badge bg-{{ 'success' if difficulty == 'beginner' else ('warning' if difficulty == 'intermediate' else 'danger') }} fs-6">
+            <i data-feather="layers"></i>
+            {{ difficulty|capitalize }}
+        </span>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <h1 class="display-6 fw-bold mb-2">{% block lesson_heading %}Lesson{% endblock %}</h1>
+                            <p class="lead text-muted mb-0">{% block lesson_description %}Learn the fundamentals{% endblock %}</p>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="easyModeToggle" {% if difficulty == 'beginner' %}checked{% endif %}>
+                                <label class="form-check-label" for="easyModeToggle">Easy Mode</label>
+                            </div>
+                            <button class="btn btn-outline-primary" onclick="playAudio()" id="playAudioBtn">
+                                <i data-feather="volume-2"></i> Play Audio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-lg-8">
+            <div class="lesson-content content-area">
+                {% block lesson_content %}{% endblock %}
+            </div>
+            
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i data-feather="arrow-left"></i> Back to Dashboard
+                        </a>
+                        {% if quiz_id %}
+                        <a href="{{ url_for('quiz', quiz_id=quiz_id) }}" class="btn btn-primary">
+                            Take Quiz <i data-feather="arrow-right"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-4 mt-4 mt-lg-0">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-header bg-transparent border-0 p-4 pb-2">
+                    <h5 class="mb-0"><i data-feather="settings"></i> Accessibility</h5>
+                </div>
+                <div class="card-body p-4 pt-2">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="highContrastToggle" onchange="toggleHighContrast()">
+                        <label class="form-check-label" for="highContrastToggle">High Contrast</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="largeTextToggle" onchange="toggleLargeText()">
+                        <label class="form-check-label" for="largeTextToggle">Large Text</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="reducedMotionToggle" onchange="toggleReducedMotion()">
+                        <label class="form-check-label" for="reducedMotionToggle">Reduced Motion</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="audioModeToggle" onchange="toggleAudioMode()">
+                        <label class="form-check-label" for="audioModeToggle">Audio Mode</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button class="btn btn-primary speak-btn" onclick="startSpeechInput()" id="speakBtn" title="Speak a command">
+    <i data-feather="mic"></i>
+</button>
+
+<div class="audio-controls">
+    <audio id="lessonAudio" style="display: none;"></audio>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+<script>
+const lessonName = "{{ lesson_name }}";
+let currentAudioUrl = null;
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+
+async function playAudio() {
+    const btn = document.getElementById('playAudioBtn');
+    const audio = document.getElementById('lessonAudio');
+    
+    const content = document.querySelector('.lesson-content').innerText;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
+    
+    try {
+        const response = await fetch(`/api/tts?text=${encodeURIComponent(content.substring(0, 1000))}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.audio_url) {
+                audio.src = data.audio_url;
+                audio.play();
+                btn.innerHTML = '<i data-feather="pause"></i> Pause';
+                feather.replace();
+            }
+        }
+    } catch (error) {
+        console.error('TTS error:', error);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-feather="volume-2"></i> Play Audio';
+        feather.replace();
+    }
+}
+
+async function startSpeechInput() {
+    const btn = document.getElementById('speakBtn');
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Speech input is not supported in your browser');
+        return;
+    }
+    
+    if (isRecording) {
+        mediaRecorder.stop();
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-primary');
+        isRecording = false;
+        return;
+    }
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        
+        mediaRecorder.ondataavailable = (e) => {
+            audioChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+            
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                const response = await fetch('/api/stt', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken || '' },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.text) {
+                        handleVoiceCommand(data.text);
+                    }
+                }
+            } catch (error) {
+                console.error('STT error:', error);
+            }
+            
+            stream.getTracks().forEach(track => track.stop());
+        };
+        
+        mediaRecorder.start();
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-danger');
+        isRecording = true;
+        
+        setTimeout(() => {
+            if (isRecording) {
+                mediaRecorder.stop();
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-primary');
+                isRecording = false;
+            }
+        }, 5000);
+        
+    } catch (error) {
+        console.error('Microphone access error:', error);
+        alert('Could not access microphone');
+    }
+}
+
+function handleVoiceCommand(text) {
+    const lowerText = text.toLowerCase();
+    
+    if (lowerText.includes('play') || lowerText.includes('read')) {
+        playAudio();
+    } else if (lowerText.includes('next')) {
+        window.location.href = "{{ url_for('dashboard') }}";
+    } else if (lowerText.includes('quiz') || lowerText.includes('test')) {
+        {% if quiz_id %}
+        window.location.href = "{{ url_for('quiz', quiz_id=quiz_id) }}";
+        {% endif %}
+    } else if (lowerText.includes('contrast')) {
+        toggleHighContrast();
+    } else if (lowerText.includes('large') || lowerText.includes('big')) {
+        toggleLargeText();
+    }
+}
+
+function toggleHighContrast() {
+    const isEnabled = document.getElementById('highContrastToggle').checked;
+    document.body.classList.toggle('high-contrast', isEnabled);
+    saveAccessibilitySetting('high_contrast', isEnabled);
+}
+
+function toggleLargeText() {
+    const isEnabled = document.getElementById('largeTextToggle').checked;
+    document.body.classList.toggle('large-text', isEnabled);
+    saveAccessibilitySetting('large_text', isEnabled);
+}
+
+function toggleReducedMotion() {
+    const isEnabled = document.getElementById('reducedMotionToggle').checked;
+    document.body.classList.toggle('reduced-motion', isEnabled);
+    saveAccessibilitySetting('reduced_motion', isEnabled);
+}
+
+function toggleAudioMode() {
+    const isEnabled = document.getElementById('audioModeToggle').checked;
+    document.body.classList.toggle('audio-mode', isEnabled);
+    saveAccessibilitySetting('audio_mode', isEnabled);
+    if (isEnabled) {
+        playAudio();
+    }
+}
+
+async function saveAccessibilitySetting(setting, value) {
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        await fetch('/api/accessibility/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken || ''
+            },
+            body: JSON.stringify({ [setting]: value })
+        });
+    } catch (error) {
+        console.error('Failed to save accessibility setting:', error);
+    }
+}
+
+document.getElementById('easyModeToggle').addEventListener('change', async function() {
+    const difficulty = this.checked ? 'beginner' : 'intermediate';
+    window.location.href = `{{ url_for('lesson_page', lesson_name=lesson_name) }}?difficulty=${difficulty}`;
+});
+
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/api/accessibility/settings');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.settings) {
+                const s = data.settings;
+                document.getElementById('highContrastToggle').checked = s.high_contrast || false;
+                document.getElementById('largeTextToggle').checked = s.large_text || false;
+                document.getElementById('reducedMotionToggle').checked = s.reduced_motion || false;
+                document.getElementById('audioModeToggle').checked = s.audio_mode || false;
+                
+                if (s.high_contrast) document.body.classList.add('high-contrast');
+                if (s.large_text) document.body.classList.add('large-text');
+                if (s.reduced_motion) document.body.classList.add('reduced-motion');
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load accessibility settings:', error);
+    }
+});
+</script>
+{% endblock %}

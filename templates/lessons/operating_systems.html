@@ -1,0 +1,86 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Operating Systems{% endblock %}
+{% block lesson_heading %}Operating Systems{% endblock %}
+{% block lesson_description %}Learn how operating systems manage computer resources{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section">
+    {% if difficulty == 'beginner' %}
+    <h2>What is an Operating System?</h2>
+    <p class="lead">An operating system is the main program that runs on your computer. It's like a manager that helps all your apps work together!</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Think of the operating system as a traffic controller - it makes sure all programs take turns using the computer!
+    </div>
+
+    <h3>Common Operating Systems</h3>
+    <ul>
+        <li><strong>Windows:</strong> Used on most PCs</li>
+        <li><strong>macOS:</strong> Used on Apple computers</li>
+        <li><strong>Linux:</strong> Popular for servers and developers</li>
+    </ul>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>Operating System Fundamentals</h2>
+    <p class="lead">Operating systems manage hardware resources, provide services for applications, and create a user interface for interaction with the computer.</p>
+    
+    <h3>Core OS Functions</h3>
+    <ul>
+        <li><strong>Process Management:</strong> Running multiple programs</li>
+        <li><strong>Memory Management:</strong> Allocating RAM to programs</li>
+        <li><strong>File Systems:</strong> Organizing data on disk</li>
+        <li><strong>I/O Management:</strong> Handling devices</li>
+    </ul>
+
+    <h3>Example: Process Information</h3>
+    <div class="code-example">
+        <pre>import os
+import psutil
+
+print(f"Process ID: {os.getpid()}")
+print(f"CPU Usage: {psutil.cpu_percent()}%")
+print(f"Memory: {psutil.virtual_memory().percent}% used")</pre>
+    </div>
+
+    {% else %}
+    <h2>Advanced Operating Systems</h2>
+    <p class="lead">Understanding kernel internals, scheduling algorithms, memory management techniques, and system calls is crucial for systems programming.</p>
+    
+    <h3>OS Internals</h3>
+    <ul>
+        <li><strong>Scheduling Algorithms:</strong> Round-robin, Priority, Multilevel Queue</li>
+        <li><strong>Virtual Memory:</strong> Paging, Segmentation, TLB</li>
+        <li><strong>Synchronization:</strong> Mutexes, Semaphores, Monitors</li>
+        <li><strong>Deadlock:</strong> Prevention, Avoidance, Detection</li>
+    </ul>
+
+    <h3>Example: Threading and Synchronization</h3>
+    <div class="code-example">
+        <pre>import threading
+
+counter = 0
+lock = threading.Lock()
+
+def increment():
+    global counter
+    for _ in range(100000):
+        with lock:
+            counter += 1
+
+threads = [threading.Thread(target=increment) for _ in range(4)]
+for t in threads: t.start()
+for t in threads: t.join()
+print(f"Counter: {counter}")</pre>
+    </div>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Visual Diagram</h3>
+    <div class="diagram-placeholder">
+        <span><i data-feather="cpu"></i> OS Architecture Layers</span>
+    </div>
+</div>
+{% endblock %}

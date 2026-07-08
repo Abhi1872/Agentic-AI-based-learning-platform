@@ -1,0 +1,104 @@
+{
+    "programming_basics": {
+        "beginner": {
+            "description": "Simple explanation of programming concepts using everyday examples",
+            "reading_time": 10,
+            "complexity": "low"
+        },
+        "intermediate": {
+            "description": "Core programming concepts with code examples",
+            "reading_time": 15,
+            "complexity": "medium"
+        },
+        "advanced": {
+            "description": "In-depth programming paradigms and best practices",
+            "reading_time": 25,
+            "complexity": "high"
+        }
+    },
+    "data_structures": {
+        "beginner": {
+            "description": "Introduction to organizing data with simple examples",
+            "reading_time": 12,
+            "complexity": "low"
+        },
+        "intermediate": {
+            "description": "Common data structures like arrays, lists, and trees",
+            "reading_time": 20,
+            "complexity": "medium"
+        },
+        "advanced": {
+            "description": "Complex data structures and algorithmic analysis",
+            "reading_time": 30,
+            "complexity": "high"
+        }
+    },
+    "databases": {
+        "beginner": {
+            "description": "What databases are and why we use them",
+            "reading_time": 10,
+            "complexity": "low"
+        },
+        "intermediate": {
+            "description": "SQL queries and relational database design",
+            "reading_time": 18,
+            "complexity": "medium"
+        },
+        "advanced": {
+            "description": "Database optimization, indexing, and transactions",
+            "reading_time": 28,
+            "complexity": "high"
+        }
+    },
+    "networking": {
+        "beginner": {
+            "description": "How computers talk to each other",
+            "reading_time": 10,
+            "complexity": "low"
+        },
+        "intermediate": {
+            "description": "TCP/IP, HTTP protocols, and network layers",
+            "reading_time": 18,
+            "complexity": "medium"
+        },
+        "advanced": {
+            "description": "Network security, routing protocols, and distributed systems",
+            "reading_time": 25,
+            "complexity": "high"
+        }
+    },
+    "operating_systems": {
+        "beginner": {
+            "description": "What an operating system does in simple terms",
+            "reading_time": 10,
+            "complexity": "low"
+        },
+        "intermediate": {
+            "description": "Process management, memory, and file systems",
+            "reading_time": 20,
+            "complexity": "medium"
+        },
+        "advanced": {
+            "description": "Kernel internals, scheduling algorithms, and virtualization",
+            "reading_time": 30,
+            "complexity": "high"
+        }
+    },
+    "oops": {
+        "beginner": {
+            "description": "Objects and classes explained with real-world examples",
+            "reading_time": 12,
+            "complexity": "low"
+        },
+        "intermediate": {
+            "description": "Inheritance, polymorphism, and encapsulation",
+            "reading_time": 20,
+            "complexity": "medium"
+        },
+        "advanced": {
+            "description": "Design patterns, SOLID principles, and advanced OOP concepts",
+            "reading_time": 28,
+            "complexity": "high"
+        }
+    }
+}

@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}Progress & Analytics - NeuroAid Learning{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">
+                <i data-feather="bar-chart-2" aria-hidden="true"></i>
+                Your Progress & Analytics
+            </h1>
+            <p class="text-muted">Track your learning journey and see how far you've come</p>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="stat-icon mb-3 text-primary">
+                        <i data-feather="book-open" style="width: 32px; height: 32px;" aria-hidden="true"></i>
+                    </div>
+                    <div class="display-6 fw-bold text-primary">{{ lesson_stats.completed }}</div>
+                    <p class="text-muted mb-0">Lessons Completed</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="stat-icon mb-3 text-success">
+                        <i data-feather="edit-3" style="width: 32px; height: 32px;" aria-hidden="true"></i>
+                    </div>
+                    <div class="display-6 fw-bold text-success">{{ quiz_stats.total_quizzes }}</div>
+                    <p class="text-muted mb-0">Quizzes Taken</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="stat-icon mb-3 text-info">
+                        <i data-feather="percent" style="width: 32px; height: 32px;" aria-hidden="true"></i>
+                    </div>
+                    <div class="display-6 fw-bold text-info">{{ quiz_stats.average_score }}%</div>
+                    <p class="text-muted mb-0">Average Score</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="stat-icon mb-3 text-warning">
+                        <i data-feather="zap" style="width: 32px; height: 32px;" aria-hidden="true"></i>
+                    </div>
+                    <div class="display-6 fw-bold text-warning">{{ student.streak_days }}</div>
+                    <p class="text-muted mb-0">Day Streak</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h2 class="h5 mb-0">
+                        <i data-feather="trending-up" aria-hidden="true"></i>
+                        Score Progression
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    {% if score_chart %}
+                    <img src="data:image/png;base64,{{ score_chart }}" 
+                         alt="Line chart showing quiz score progression over time" 
+                         class="img-fluid w-100">
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i data-feather="bar-chart" class="text-muted mb-3" style="width: 48px; height: 48px;" aria-hidden="true"></i>
+                        <p class="text-muted mb-0">Complete more quizzes to see your progress chart</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h2 class="h5 mb-0">
+                        <i data-feather="pie-chart" aria-hidden="true"></i>
+                        Quizzes by Difficulty
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    {% if difficulty_chart %}
+                    <img src="data:image/png;base64,{{ difficulty_chart }}" 
+                         alt="Pie chart showing distribution of quizzes by difficulty level" 
+                         class="img-fluid w-100">
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i data-feather="pie-chart" class="text-muted mb-3" style="width: 48px; height: 48px;" aria-hidden="true"></i>
+                        <p class="text-muted mb-0">Take quizzes to see difficulty distribution</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h2 class="h5 mb-0">
+                        <i data-feather="calendar" aria-hidden="true"></i>
+                        Weekly Report
+                    </h2>
+                    <p class="text-muted small mb-0">
+                        {{ weekly_report.period.start }} - {{ weekly_report.period.end }}
+                    </p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="h4 mb-1">{{ weekly_report.quizzes_taken }}</div>
+                                <div class="small text-muted">Quizzes This Week</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="h4 mb-1">{{ weekly_report.average_score }}%</div>
+                                <div class="small text-muted">Average Score</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="h4 mb-1">{{ weekly_report.time_spent_minutes }} min</div>
+                                <div class="small text-muted">Time Spent</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="h4 mb-1">{{ weekly_report.lessons_accessed }}</div>
+                                <div class="small text-muted">Lessons Accessed</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if weekly_report.achievements %}
+                    <h3 class="h6 mb-3">Achievements Earned</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for achievement in weekly_report.achievements %}
+                        <span class="badge bg-warning text-dark p-2" title="{{ achievement.description }}">
+                            <i data-feather="{{ achievement.icon }}" aria-hidden="true" style="width: 14px; height: 14px;"></i>
+                            {{ achievement.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h2 class="h5 mb-0">
+                        <i data-feather="activity" aria-hidden="true"></i>
+                        Weekly Activity
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    {% if activity_chart %}
+                    <img src="data:image/png;base64,{{ activity_chart }}" 
+                         alt="Bar chart showing daily activity throughout the week" 
+                         class="img-fluid w-100">
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i data-feather="activity" class="text-muted mb-3" style="width: 48px; height: 48px;" aria-hidden="true"></i>
+                        <p class="text-muted mb-0">Your weekly activity will appear here</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h2 class="h5 mb-0">
+                        <i data-feather="target" aria-hidden="true"></i>
+                        Performance Analysis
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-semibold">Accuracy</span>
+                            <span class="badge bg-{{ 'success' if performance.accuracy_rating == 'excellent' else 'warning' if performance.accuracy_rating == 'good' else 'danger' }}">
+                                {{ performance.accuracy_rating | replace('_', ' ') | title }}
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-primary" style="width: {{ performance.average_score }}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-semibold">Improvement Trend</span>
+                            <span class="badge bg-{{ 'success' if performance.improvement_trend == 'improving' else 'info' if performance.improvement_trend == 'stable' else 'warning' }}">
+                                {{ performance.improvement_trend | title }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-semibold">Speed Rating</span>
+                            <span class="badge bg-info">{{ performance.speed_rating | title }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-primary d-flex align-items-start gap-3 mb-0" role="alert">
+                        <i data-feather="info" aria-hidden="true" class="flex-shrink-0 mt-1"></i>
+                        <div>
+                            <strong>Recommended Level:</strong> {{ performance.recommended_difficulty | title }}<br>
+                            <small>Based on your recent performance</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h2 class="h5 mb-0">
+                        <i data-feather="star" aria-hidden="true"></i>
+                        Personalized Recommendations
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    {% if recommendations %}
+                    <div class="recommendations-list">
+                        {% for rec in recommendations %}
+                        <div class="recommendation-item d-flex align-items-start gap-3 mb-3 p-3 bg-light rounded-3">
+                            <div class="rec-icon">
+                                <i data-feather="{{ rec.icon }}" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <h4 class="h6 mb-1">{{ rec.title }}</h4>
+                                <p class="small text-muted mb-0">{{ rec.message }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i data-feather="check-circle" class="text-success mb-3" style="width: 48px; height: 48px;" aria-hidden="true"></i>
+                        <p class="text-muted mb-0">Great job! Keep up the excellent work!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if quiz_stats.recent_scores %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 p-4 pb-0">
+                    <h2 class="h5 mb-0">
+                        <i data-feather="clock" aria-hidden="true"></i>
+                        Recent Quiz Results
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Score</th>
+                                    <th scope="col">Difficulty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in quiz_stats.recent_scores %}
+                                <tr>
+                                    <td>{{ result.date }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if result.score >= 80 else 'warning' if result.score >= 60 else 'danger' }} fs-6">
+                                            {{ result.score }}%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ get_difficulty_color(result.difficulty) }}">
+                                            {{ get_difficulty_label(result.difficulty) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "lessons/lesson_base.html" %}
+
+{% block lesson_title %}Computer Architecture{% endblock %}
+{% block lesson_heading %}Computer Architecture{% endblock %}
+{% block lesson_description %}Understand how computers are built and how hardware executes programs{% endblock %}
+
+{% block lesson_content %}
+<div class="lesson-content-section" id="lesson-audio-content">
+    {% if difficulty == 'beginner' %}
+    <h2>What is Computer Architecture?</h2>
+    <p class="lead">Computer architecture is about understanding how computers work at the hardware level - the physical parts that make up a computer.</p>
+    
+    <div class="alert alert-info">
+        <i data-feather="info"></i>
+        <strong>Simple Explanation:</strong> Just like a car has an engine, wheels, and steering, a computer has a CPU, memory, and storage that work together.
+    </div>
+
+    <h3>Main Components</h3>
+    <ul>
+        <li><strong>CPU (Central Processing Unit):</strong> The brain of the computer that does calculations</li>
+        <li><strong>RAM (Random Access Memory):</strong> Fast, temporary storage for running programs</li>
+        <li><strong>Storage:</strong> Permanent storage like hard drives or SSDs</li>
+        <li><strong>Input/Output:</strong> Keyboard, mouse, monitor, etc.</li>
+    </ul>
+
+    <h3>How the CPU Works</h3>
+    <p>The CPU follows a simple cycle:</p>
+    <ol>
+        <li><strong>Fetch:</strong> Get the next instruction from memory</li>
+        <li><strong>Decode:</strong> Understand what the instruction means</li>
+        <li><strong>Execute:</strong> Perform the instruction</li>
+        <li><strong>Store:</strong> Save the result</li>
+    </ol>
+
+    {% elif difficulty == 'intermediate' %}
+    <h2>CPU Architecture and Design</h2>
+    <p class="lead">Exploring instruction set architectures, pipelining, and memory hierarchy.</p>
+    
+    <h3>Instruction Set Architecture (ISA)</h3>
+    <p>The ISA defines the interface between hardware and software:</p>
+    <ul>
+        <li><strong>RISC (Reduced Instruction Set Computer):</strong> Simple, fixed-length instructions (ARM, RISC-V)</li>
+        <li><strong>CISC (Complex Instruction Set Computer):</strong> Complex, variable-length instructions (x86)</li>
+    </ul>
+
+    <h3>Pipelining</h3>
+    <p>Pipelining allows multiple instructions to be processed simultaneously:</p>
+    <div class="code-example">
+        <pre>Classic 5-Stage Pipeline:
+┌─────────┬─────────┬─────────┬─────────┬─────────┐
+│  Fetch  │  Decode │ Execute │  Memory │  Write  │
+│   (IF)  │   (ID)  │   (EX)  │   (MEM) │  (WB)   │
+└─────────┴─────────┴─────────┴─────────┴─────────┘
+
+Clock Cycle:  1    2    3    4    5    6    7
+Instruction1: IF   ID   EX   MEM  WB
+Instruction2:      IF   ID   EX   MEM  WB
+Instruction3:           IF   ID   EX   MEM  WB</pre>
+    </div>
+
+    <h3>Memory Hierarchy</h3>
+    <p>Speed vs. capacity tradeoff:</p>
+    <ul>
+        <li><strong>Registers:</strong> Fastest, smallest (nanoseconds)</li>
+        <li><strong>L1 Cache:</strong> Very fast, small (1-2 cycles)</li>
+        <li><strong>L2/L3 Cache:</strong> Fast, medium (10-50 cycles)</li>
+        <li><strong>Main Memory (RAM):</strong> Slower, larger (100-300 cycles)</li>
+        <li><strong>Storage (SSD/HDD):</strong> Slowest, largest (milliseconds)</li>
+    </ul>
+
+    {% else %}
+    <h2>Advanced Computer Architecture</h2>
+    <p class="lead">Deep dive into superscalar execution, branch prediction, cache coherence, and multicore systems.</p>
+    
+    <h3>Superscalar and Out-of-Order Execution</h3>
+    <p>Modern CPUs execute multiple instructions per cycle using:</p>
+    <ul>
+        <li><strong>Multiple Execution Units:</strong> ALUs, FPUs, load/store units</li>
+        <li><strong>Register Renaming:</strong> Eliminates false dependencies</li>
+        <li><strong>Reorder Buffer:</strong> Maintains program order for commits</li>
+        <li><strong>Reservation Stations:</strong> Queue instructions for execution units</li>
+    </ul>
+
+    <h3>Branch Prediction</h3>
+    <div class="code-example">
+        <pre>Branch Prediction Strategies:
+├── Static Prediction
+│   ├── Always taken
+│   └── Backward taken, forward not taken
+└── Dynamic Prediction
+    ├── 1-bit predictor
+    ├── 2-bit saturating counter
+    ├── Correlating predictors (m,n)
+    └── Tournament predictors
+
+Modern CPUs achieve > 95% prediction accuracy</pre>
+    </div>
+
+    <h3>Cache Coherence Protocols</h3>
+    <p>In multicore systems, MESI protocol maintains cache consistency:</p>
+    <ul>
+        <li><strong>Modified:</strong> Cache line is dirty, only copy</li>
+        <li><strong>Exclusive:</strong> Clean, only copy</li>
+        <li><strong>Shared:</strong> Clean, may exist in other caches</li>
+        <li><strong>Invalid:</strong> Cache line not valid</li>
+    </ul>
+
+    <h3>Parallelism Types</h3>
+    <ul>
+        <li><strong>ILP (Instruction Level):</strong> Pipelining, superscalar</li>
+        <li><strong>TLP (Thread Level):</strong> Multithreading, multicore</li>
+        <li><strong>DLP (Data Level):</strong> SIMD, vector processing</li>
+    </ul>
+    {% endif %}
+</div>
+
+<div class="lesson-content-section">
+    <h3>Key Takeaways</h3>
+    <div class="alert alert-success">
+        <ul class="mb-0">
+            <li>Understanding hardware helps write more efficient software</li>
+            <li>Memory hierarchy impacts program performance significantly</li>
+            <li>Modern CPUs use sophisticated techniques for performance</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
